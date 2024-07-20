@@ -5,8 +5,8 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userHome')}}">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userCart')}}">Giỏ hàng</a></li>
+                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userHome.index')}}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('cart')}}">Giỏ hàng</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
             </ol>
         </nav>
@@ -39,12 +39,14 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @foreach ($productsPayment as $product)
+
                             <tr class="">
                                 <td class="">
                                     <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
+                                        <img class="me-3" src="{{$product->product->image}}" alt="" width="110">
                                         <h6 class="form-check-label">
-                                            T1 20th Anniv. Special Jacket
+                                            {{$product->product->name}}
                                         </h6>
                                     </div>
                                 </td>
@@ -54,51 +56,13 @@
                                         <span class="fw-bold">Faker,M</span>
                                     </div>
                                 </td>
-                                <td class="centered text-center">100.000đ</td>
-                                <td class="centered text-center">1</td>
+                                <td class="centered text-center">{{$product->product->sale_price}}đ</td>
+                                <td class="centered text-center">{{$product->quantity}}</td>
 
-                                <td class="centered text-center text-danger">100.000đ</td>
+                                <td class="centered text-center text-danger">{{$product->product->sale_price}}đ</td>
                             </tr>
-                            <tr class="">
-                                <td class="">
-                                    <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
-                                        <h6 class="form-check-label">
-                                            T1 20th Anniv. Special Jacket
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td class="centered">
-                                    <div class="d-flex text-center flex-column h-auto">
-                                        <span>Phân loại hàng:</span>
-                                        <span class="fw-bold">Faker,M</span>
-                                    </div>
-                                </td>
-                                <td class="centered text-center">100.000đ</td>
-                                <td class="centered text-center">1</td>
 
-                                <td class="centered text-center text-danger">100.000đ</td>
-                            </tr>
-                            <tr class="">
-                                <td class="">
-                                    <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
-                                        <h6 class="form-check-label">
-                                            T1 20th Anniv. Special Jacket
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td class="centered">
-                                    <div class="d-flex text-center flex-column h-auto">
-                                        <span>Phân loại hàng:</span>
-                                        <span class="fw-bold">Faker,M</span>
-                                    </div>
-                                </td>
-                                <td class="centered text-center">100.000đ</td>
-                                <td class="centered text-center">1</td>
-
-                                <td class="centered text-center text-danger">100.000đ</td>
-                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                     <div class="d-flex flex-row justify-content-around">
@@ -129,12 +93,12 @@
                             <tbody>
                                 <tr>
                                     <td>Tổng tiền hàng</td>
-                                    <th>₫385.339</th>
+                                    <th>₫{{$total_payment}}</th>
                                 </tr>
                                 <tr>
                                     <td>Phí vận chuyển
                                     </td>
-                                    <th>₫42.800</th>
+                                    <th>₫{{$shipping}}</th>
                                 </tr>
                                 <tr>
                                     <td>Giảm phí vận chuyển
@@ -149,7 +113,7 @@
                                 <tr>
                                     <td class="centered">Tổng thanh toán
                                     </td>
-                                    <th class="fs-4 text-danger fw-bold">₫428.139</th>
+                                    <th class="fs-4 text-danger fw-bold">₫{{$shipping+$total_payment}}</th>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="text-center">

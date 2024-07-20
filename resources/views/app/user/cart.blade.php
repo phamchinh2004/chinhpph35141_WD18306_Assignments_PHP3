@@ -36,13 +36,15 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach ($productCart as $product)
+
                                 <tr class="">
                                     <td class="">
                                         <div class="form-check d-flex flex-row align-items-center">
                                             <input class="form-check-input me-3 product-checkbox checkBoxProduct" type="checkbox">
-                                            <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
+                                            <img class="me-3" src="{{$product->product->image}}" alt="" width="110">
                                             <h6 class="form-check-label">
-                                                T1 20th Anniv. Special Jacket
+                                                {{$product->product->name}}
                                             </h6>
                                         </div>
                                     </td>
@@ -52,83 +54,23 @@
                                             <span class="fw-bold">Faker,M</span>
                                         </div>
                                     </td>
-                                    <td class="centered text-center">100.000đ</td>
+                                    <td class="centered text-center">{{$product->product->sale_price}}đ</td>
                                     <td class="centered">
                                         <div class="d-flex flex-row justify-content-center">
                                             <button class="btn btn-outline-dark btn-white" style="width:30px;">-</button>
-                                            <input type="text" class="form-control text-align-center" style="width:40px;" value="1">
+                                            <input type="text" class="form-control text-align-center" style="width:40px;" value="{{$product->quantity}}">
                                             <button class="btn btn-outline-dark btn-white" style="width:30px;">+</button>
                                         </div>
                                     </td>
-                                    <td class="centered text-center">100.000đ</td>
+                                    <td class="centered text-center">{{$product->product->sale_price}}đ</td>
                                     <td class="centered">
                                         <div class="d-flex justify-content-center">
                                             <button class="btn btn-danger">Xóa</button>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr class="">
-                                    <td class="">
-                                        <div class="form-check d-flex flex-row align-items-center">
-                                            <input class="form-check-input me-3 product-checkbox checkBoxProduct" type="checkbox">
-                                            <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
-                                            <h6 class="form-check-label">
-                                                T1 20th Anniv. Special Jacket
-                                            </h6>
-                                        </div>
-                                    </td>
-                                    <td class="centered">
-                                        <div class="d-flex text-center flex-column h-auto">
-                                            <span>Phân loại hàng:</span>
-                                            <span class="fw-bold">Faker,M</span>
-                                        </div>
-                                    </td>
-                                    <td class="centered text-center">100.000đ</td>
-                                    <td class="centered">
-                                        <div class="d-flex flex-row justify-content-center">
-                                            <button class="btn btn-outline-dark btn-white" style="width:30px;">-</button>
-                                            <input type="text" class="form-control text-align-center" style="width:40px;" value="1">
-                                            <button class="btn btn-outline-dark btn-white" style="width:30px;">+</button>
-                                        </div>
-                                    </td>
-                                    <td class="centered text-center">100.000đ</td>
-                                    <td class="centered">
-                                        <div class="d-flex justify-content-center">
-                                            <button class="btn btn-danger">Xóa</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="">
-                                    <td class="">
-                                        <div class="form-check d-flex flex-row align-items-center">
-                                            <input class="form-check-input me-3 product-checkbox checkBoxProduct" type="checkbox">
-                                            <img class="me-3" src="{{asset('image/products/product1.jpg')}}" alt="" width="110">
-                                            <h6 class="form-check-label">
-                                                T1 20th Anniv. Special Jacket
-                                            </h6>
-                                        </div>
-                                    </td>
-                                    <td class="centered">
-                                        <div class="d-flex text-center flex-column h-auto">
-                                            <span>Phân loại hàng:</span>
-                                            <span class="fw-bold">Faker,M</span>
-                                        </div>
-                                    </td>
-                                    <td class="centered text-center">100.000đ</td>
-                                    <td class="centered">
-                                        <div class="d-flex flex-row justify-content-center">
-                                            <button class="btn btn-outline-dark btn-white" style="width:30px;">-</button>
-                                            <input type="text" class="form-control text-align-center" style="width:40px;" value="1">
-                                            <button class="btn btn-outline-dark btn-white" style="width:30px;">+</button>
-                                        </div>
-                                    </td>
-                                    <td class="centered text-center">100.000đ</td>
-                                    <td class="centered">
-                                        <div class="d-flex justify-content-center">
-                                            <button class="btn btn-danger">Xóa</button>
-                                        </div>
-                                    </td>
-                                </tr>
+
+                                @endforeach
                             </tbody>
                             <tfoot class="table-dark sticky-md-bottom">
                                 <tr>
@@ -136,16 +78,16 @@
                                         <div class="form-check d-flex align-items-center">
                                             <input class="form-check-input checkBoxAll" type="checkbox" value="" id="checkBoxAll">
                                             <label class="form-check-label ms-2" for="checkBoxAll">
-                                                Chọn tất cả (2)
+                                                Chọn tất cả ({{$productCart->count()}})
                                             </label>
                                             <button class="btn btn-dark btn-outline-light ms-2" id="deleteAllSelectRecord">Xóa</button>
                                         </div>
                                     </th>
-                                    <th>Tổng thanh toán (2 sản phẩm)</th>
+                                    <th>Tổng thanh toán ({{$productCart->count()}} sản phẩm)</th>
                                     <th>
                                         <div class="d-flex align-items-center ms-3">
                                             <p class="border-bottom border-white mb-1 fw-bold text-white me-1">đ</p>
-                                            <h3 class="mb-0 text-white">799.000</h3>
+                                            <h3 class="mb-0 text-white">{{$total_payment}}</h3>
                                         </div>
                                     </th>
                                     <th>

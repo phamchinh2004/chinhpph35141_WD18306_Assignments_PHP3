@@ -5,8 +5,8 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userHome')}}">Trang chủ</a></li>
-                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userCart')}}">Giỏ hàng</a></li>
+                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userHome.index')}}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('cart')}}">Giỏ hàng</a></li>
                 <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userPayment')}}">Thanh toán</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Thông tin đơn hàng</li>
             </ol>

@@ -31,17 +31,13 @@ Route::get('userHome/', [UserController::class, 'index'])->name('userHome.index'
 
 Route::get('productDetail/{id}', [UserController::class, 'show'])->name('userProductDetail.show');
 
-Route::get('cart/', function () {
-    return view('app.user.cart');
-})->name('userCart');
+Route::get('cart/', [UserController::class, 'cart'])->name('cart');
 
-Route::get('payment', function () {
-    return view('app.user.payment');
-})->name('userPayment');
+Route::get('cart/{id}', [UserController::class, 'addToCart'])->name('addToCart');
 
-Route::get('order', function () {
-    return view('app.user.order');
-})->name('userOrder');
+Route::get('payment', [UserController::class, 'payment'])->name('userPayment');
+
+Route::get('order', [UserController::class, 'order'])->name('userOrder');
 
 Route::get('adminHome', function () {
     return view('app.admin.home');

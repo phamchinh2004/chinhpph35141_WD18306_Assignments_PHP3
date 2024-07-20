@@ -4,7 +4,7 @@
 
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="border w-50 h-auto d-flex flex-column align-items-center rounded bg-white scroll">
-        <a href="{{route('/')}}" class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none text-black">
+        <a href="{{route('userHome.index')}}" class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none text-black">
             <i class="fa-solid fa-close fa-2xl"></i>
         </a>
         <img class="rounded mt-3" src="{{ asset('image/logo-removebg.png') }}" alt="" width="130" height="90">
