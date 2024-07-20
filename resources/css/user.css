@@ -1,0 +1,32 @@
+.cus-input>.form-control,
+.cus-input>.btn {
+    border-radius: 0%;
+}
+
+.margin-header {
+    padding-top: 101px;
+}
+
+.fix-height {
+    max-height: 300px;
+}
+
+.strikethough::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: black;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+.cs-pt{
+    cursor: pointer;
+}
+.text-align-center{
+    text-align: center;
+}
+.centered{
+    vertical-align: middle;
+}
