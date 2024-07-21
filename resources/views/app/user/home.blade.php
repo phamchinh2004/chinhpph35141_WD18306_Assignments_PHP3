@@ -81,8 +81,8 @@
                         <p class="text-dark text-center border-bottom pb-3 fw-bold mt-3">{{$product->name}}...</p>
                     </a>
                     <div class="d-flex flex-column justify-content-center align-items-center">
-                        <p class="text-decoration-line-through mb-1">{{$product->purchase_price}}</p>
-                        <p class="fs-5 fw-bold">{{$product->sale_price}}</p>
+                        <p class="text-decoration-line-through mb-1">đ{{$product->purchase_price}}</p>
+                        <p class="fs-5 fw-bold">đ{{$product->sale_price}}</p>
                         <p>Đã bán: {{$product->total_quantity}}</p>
                     </div>
                     <div>

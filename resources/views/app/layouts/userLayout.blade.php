@@ -10,6 +10,40 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/26096abf41.js" crossorigin="anonymous"></script>
+
+    <style>
+        .cus-input>.form-control,
+        .cus-input>.btn {
+            border-radius: 0%;
+        }
+
+        .fix-height {
+            height: 300px;
+        }
+
+        .strikethough::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background-color: black;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+        }
+
+        .cs-pt {
+            cursor: pointer;
+        }
+
+        .text-align-center {
+            text-align: center;
+        }
+
+        .centered {
+            vertical-align: middle;
+        }
+    </style>
 </head>
 
 <body>
@@ -59,7 +93,7 @@
         </div>
     </header>
     <!-- CONTAINER -->
-    <div class="margin-header">
+    <div style="padding-top: 101px;">
         @yield('content')
     </div>
     <!-- FOOTER -->
@@ -78,6 +112,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{mix('resources/js/user.js')}}"></script>
+    <script>
+        $(document).ready(function(e) {
+            $('.checkBoxAll').click(function() {
+                $('.checkBoxProduct').prop('checked', $(this).prop('checked'));
+                $('.checkBoxAll').prop('checked', $(this).prop('checked'));
+            })
+            $('.checkBoxProduct').click(function() {
+                if ($('.checkBoxProduct:checked').length != $('.checkBoxProduct').length) {
+                    $('.checkBoxAll').prop('checked', false);
+                } else {
+                    $('.checkBoxAll').prop('checked', true);
+                }
+            })
+        })
+    </script>
 </body>
 
 </html>

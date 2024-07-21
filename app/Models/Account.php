@@ -8,13 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 class Account extends Model
 {
     use HasFactory;
-    public function carts(){
+    protected $fillable = [
+        'username',
+        'password',
+        'role',
+        'is_active',
+        'created_at',
+        'updated_at'
+    ];
+    public function carts()
+    {
         return $this->hasMany(Cart::class);
     }
-    public function orders(){
-        return $this->hasMany(Order::class);
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'account_id');
     }
-    public function informations(){
+    public function informations()
+    {
         return $this->hasMany(Information::class);
     }
 }

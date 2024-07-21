@@ -101,8 +101,8 @@ class UserController extends Controller
         $order = Order::create([
             'total_cost' => $total_cost,
             'shipping_price' => $shipping,
-            'shipping_voucher' => '',
-            'voucher' => '',
+            'shipping_voucher' => 0,
+            'voucher' => 0,
             'total_payment' => $total_payment,
             'account_id' => 1,
             'created_at' => now()
@@ -121,8 +121,13 @@ class UserController extends Controller
         foreach ($productsPayment as $product) {
             Cart::where('account_id', 1)->delete();
         }
-        
-        return view('app.user.order');
+        $orderDetail = Order::with('orderDetails.product')
+            ->where('account_id', 1)
+            ->where('id', $order->id)
+            // ->where('id', 1)
+            ->first();
+        // dd($orderDetail);
+        return view('app.user.order', compact('orderDetail'));
     }
     /**
      * Show the form for editing the specified resource.
