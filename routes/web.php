@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckAdminMiddleware;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,20 +19,22 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('userHome.index');
+    // return view('welcome');
 })->name('/');
 
-Route::get('login', function () {
-    return view('app.login');
-})->name('login');
+//-----------------------LOGIN-REGISTER-LOGOUT-------------------------
+Route::get('auth/login', [LoginController::class,'index'])->name('login');
+Route::post('auth/login', [LoginController::class,'login'])->name('login');
+Route::get('auth/logout', [LoginController::class,'logout'])->name('logout');
 
-Route::get('register', function () {
-    return view('app.register');
-})->name('register');
+Route::get('auth/register', [RegisterController::class,'index'])->name('register');
+Route::post('auth/register', [RegisterController::class,'register'])->name('register');
 
-//-----------------------USER-------------------------
+//--------------------------------USER----------------------------------
 Route::get('userHome/', [UserController::class, 'index'])->name('userHome.index');
 
 Route::get('productDetail/{id}', [UserController::class, 'show'])->name('userProductDetail.show');
+Route::post('productDetail/', [UserController::class, 'updateInformationProduct'])->name('userProductDetailFocused.show');
 
 Route::get('cart/', [UserController::class, 'cart'])->name('cart');
 
@@ -43,9 +48,17 @@ Route::get('adminHome', function () {
     return view('app.admin.home');
 })->name('adminHome');
 
-//-----------------------ADMIN-------------------------
+//-------------------------------ADMIN----------------------------------
+// Route::get('admin',function(){
+//     return 'ADMIN';
+// })->middleware(CheckAdminMiddleware::class);
+
+// Route::get('admin',function(){
+//     return 'ADMIN';
+// })->middleware('isAdmin');
+
 Route::get('productsManager', function () {
-    return view('app.admin.products.index');
+    return view('app.admin.products.index'); 
 })->name('adminProductsMagager');
 
 Route::get('categoriesManager', function () {

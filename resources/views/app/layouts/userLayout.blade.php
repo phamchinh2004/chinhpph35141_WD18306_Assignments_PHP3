@@ -10,8 +10,11 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/26096abf41.js" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
     <style>
+        /* Giao dien nguoi dung */
         .cus-input>.form-control,
         .cus-input>.btn {
             border-radius: 0%;
@@ -42,6 +45,18 @@
 
         .centered {
             vertical-align: middle;
+        }
+
+        .attribute-value-hover:hover {
+            border-color: black !important;
+            /* color: white !important; */
+            /* font-weight: bold; */
+        }
+
+        .focused {
+            background-color: black !important;
+            color: white !important;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -80,15 +95,23 @@
                 </form>
             </div>
             <div class="d-flex flex-row">
-                <div class="me-2">
-                    <a class="btn btn-white border btn-outline-success" href="{{route('login')}}">Đăng nhập</a>
-                </div>
-                <div class="me-2">
-                    <a class="btn btn-white border btn-outline-primary" href="{{route('register')}}">Đăng ký</a>
-                </div>
+                @if(Route::has('login'))
+                @auth
+                <p>Hello user</p>
                 <div class="me-2">
                     <a class="btn btn-white border btn-outline-dark" href="{{route('login')}}"><i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Đăng xuất</a>
                 </div>
+                @else
+                <div class="me-2">
+                    <a class="btn btn-white border btn-outline-success" href="{{route('login')}}">Đăng nhập</a>
+                </div>
+                @if(Route::has('register'))
+                <div class="me-2">
+                    <a class="btn btn-white border btn-outline-primary" href="{{route('register')}}">Đăng ký</a>
+                </div>
+                @endif
+                @endauth
+                @endif
             </div>
         </div>
     </header>
@@ -111,9 +134,34 @@
     </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{mix('resources/js/user.js')}}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.js.map"></script>
+    <!-- <script src="{{mix('resources/js/user.js')}}"></script> -->
     <script>
         $(document).ready(function(e) {
+            function notifications(type, data, title) {
+                $(function() {
+                    Command: toastr[type](data, title);
+                    toastr.options = {
+                        closeButton: true,
+                        debug: false,
+                        newestOnTop: true,
+                        progressBar: true,
+                        positionClass: "toast-top-right",
+                        preventDuplicates: true,
+                        onclick: null,
+                        showDuration: "300",
+                        hideDuration: "1000",
+                        timeOut: "10000",
+                        extendedTimeOut: "1000",
+                        showEasing: "swing",
+                        hideEasing: "linear",
+                        showMethod: "fadeIn",
+                        hideMethod: "fadeOut",
+                    };
+                });
+            };
+            // cart
             $('.checkBoxAll').click(function() {
                 $('.checkBoxProduct').prop('checked', $(this).prop('checked'));
                 $('.checkBoxAll').prop('checked', $(this).prop('checked'));
@@ -125,6 +173,83 @@
                     $('.checkBoxAll').prop('checked', true);
                 }
             })
+            // productDetail
+            var flag = 0;
+            var attribute_value_ids = [];
+            var current_item_id = 0;
+            var product_id = $('.product_id').val();
+            var total_attributes = $('.total_attributes').val();
+            if ($('.attribute_item').click(function(e) {
+                    var attributeValueId = $(this).data('id');
+                    if ($(this).hasClass('focused')) {
+                        flag--;
+                        $(this).removeClass('focused');
+                        attribute_value_ids = attribute_value_ids.filter(function(item) {
+                            return item != attributeValueId;
+                        });
+                    } else {
+                        var current_item = $(this).closest('.attribute_group').find('.attribute_item.focused');
+                        if (current_item.hasClass('focused')) {
+                            current_item.removeClass('focused');
+                            current_item_id = current_item.data('id');
+                            console.log('Id trước đó:' + current_item_id);
+                            flag--;
+                            attribute_value_ids = attribute_value_ids.filter(function(item) {
+                                return item != current_item_id;
+                            });
+                        }
+                        flag++;
+                        $(this).addClass('focused');
+                        attribute_value_ids.push(attributeValueId);
+                        console.log('Total_attributes:' + total_attributes);
+                        console.log('Flag:' + flag);
+                        // Action handling
+                        if (flag == total_attributes) {
+                            notifications('success', 'Đã cập nhật thông tin sản phẩm', 'Thành công');
+                            e.preventDefault();
+                            $.ajax({
+                                url: "{{route('userProductDetailFocused.show')}}",
+                                type: "POST",
+                                data: {
+                                    _token: "{{ csrf_token() }}",
+                                    attribute_value_ids: attribute_value_ids,
+                                    product_id: product_id
+                                },
+                                success: function(response) {
+                                    if (response.status == "success") {
+                                        var imageUrl=response.data['image'];
+                                        var purchar_price=response.data['purchar_price'];
+                                        var sale_price=response.data['sale_price'];
+                                        var stock=response.data['stock'];
+                                        console.log(response.data['image'])
+                                        if(imageUrl){
+                                            $('.main-image').attr('src', imageUrl);
+                                        }else{
+                                            console.log('Image url is null of undefind')
+                                        }
+                                        $('.update-purchar-price').text(purchar_price);
+                                        $('.update-sale-price').text(sale_price);
+                                        $('.update-stock').text(stock);
+                                    }else{
+                                        console.log('Response status is not success');
+                                    }
+                                },
+                                error: function(xhr) {
+                                    console.error('Status:', xhr.status); // Mã trạng thái HTTP
+                                    console.error('Status Text:', xhr.statusText); // Mô tả trạng thái HTTP
+                                    console.error('Response Text:', xhr.responseText); // Nội dung phản hồi lỗi từ server
+                                    if (xhr.responseJSON) {
+                                        console.error('Response JSON:', xhr.responseJSON);
+                                    }
+                                    alert('Đã xảy ra lỗi trong quá trình xử lý yêu cầu.');
+                                }
+                            })
+                        }
+                    }
+                    console.log('Id mới được chọn:' + attributeValueId);
+                    console.log('Cờ:' + flag);
+                    console.log('Mảng:' + attribute_value_ids);
+                }));
         })
     </script>
 </body>

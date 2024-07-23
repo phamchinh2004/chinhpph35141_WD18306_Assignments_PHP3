@@ -18,7 +18,7 @@ class Product extends Model
         'is_active',
         'category_id'
     ];
-    public function variants()
+    public function productVariants()
     {
         return $this->hasMany(ProductVariant::class);
     }

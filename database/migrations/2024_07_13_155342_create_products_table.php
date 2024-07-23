@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('purchase_price');
             $table->integer('sale_price')->nullable();
-            $table->integer('view');
+            $table->integer('view')->default(0);
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);
             $table->foreignIdFor(Category::class)->constrained();

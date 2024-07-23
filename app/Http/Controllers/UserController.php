@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantAttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -53,10 +57,79 @@ class UserController extends Controller
      */
     public function show(Product $product, string $id)
     {
-        // $productDetail = Product::with('variants.attributeValues.attributeValue.attribute', 'variants.attributeValues.attributeValue')
-        //     ->find($id);
-        $productDetail = Product::all()->where('id', $id)->first();
-        return view('app.user.productDetail', compact('productDetail'));
+        //Handle find attributes
+        $array_attribute_value_id = [];
+        $array_attribute_id = [];
+        $array_attributes = [];
+        $attribute_value_id = ProductVariant::leftJoin('products as p', 'product_variants.product_id', '=', 'p.id')
+            ->leftJoin('product_variant_attribute_values as pvv', 'product_variants.id', '=', 'pvv.product_variant_id')
+            ->select('pvv.attribute_value_id as attribute_value_id')
+            ->where('p.id', $id)
+            ->groupBy('attribute_value_id')
+            ->get();
+        foreach ($attribute_value_id as $attribute_value_id) {
+            if ($attribute_value_id->attribute_value_id != null) {
+                $array_attribute_value_id[] = $attribute_value_id->attribute_value_id;
+            }
+        }
+        foreach ($array_attribute_value_id as $attribute_value_id) {
+            $attributes = AttributeValue::select('attribute_id')
+                ->where('attribute_values.id', $attribute_value_id)
+                ->first();
+            // dd($attributes);
+            if ($attributes) {
+                if (!in_array($attributes->attribute_id, $array_attribute_id)) {
+                    $array_attribute_id[] = $attributes->attribute_id;
+                }
+            }
+        }
+        sort($array_attribute_id);
+        foreach ($array_attribute_id as $attribute_id) {
+            $dataAttribute = Attribute::with('attributeValues')->where('id', $attribute_id)->first();
+            $array_attributes[$attribute_id] = [
+                'id' => $dataAttribute->id,
+                'name' => $dataAttribute->name,
+                'attribute_values' => $dataAttribute->attributeValues->map(function ($value) {
+                    return [
+                        'id' => $value->id,
+                        'value' => $value->value,
+                        'image' => $value->image
+                    ];
+                })->toArray()
+            ];
+            foreach ($array_attributes[$attribute_id]['attribute_values'] as $key => $attribute_value) {
+                if (!in_array($attribute_value['id'], $array_attribute_value_id)) {
+                    unset($array_attributes[$attribute_id]['attribute_values'][$key]);
+                }
+            }
+        }
+        //Product query
+        $productDetail = Product::where('id', $id)->first();
+        //Get product images
+        $productImages = ProductVariant::select('product_variants.image')
+            ->where('product_variants.product_id', $id)
+            ->groupBy('product_variants.image')
+            ->get();
+        return view('app.user.productDetail', compact('productDetail', 'array_attributes', 'productImages'));
+    }
+    public function updateInformationProduct(Request $request)
+    {
+        $array_attribute_value_ids = $request->input('attribute_value_ids');
+        $product_id = $request->input('product_id');
+        $productFocusQuery = ProductVariantAttributeValue::leftJoin('attribute_values as av', 'product_variant_attribute_values.attribute_value_id', '=', 'av.id')
+            ->leftJoin('product_variants as pv', 'product_variant_attribute_values.product_variant_id', '=', 'pv.id')
+            ->leftJoin('products as p', 'pv.product_id', '=', 'p.id')
+            ->select('pv.*')
+            ->selectRaw('COUNT(product_variant_attribute_values.attribute_value_id) as total_attribute_value_id')
+            ->where('pv.product_id', $product_id)
+            ->whereIn('product_variant_attribute_values.attribute_value_id', $array_attribute_value_ids)
+            ->groupBy('pv.id')
+            ->having(DB::raw('COUNT(product_variant_attribute_values.attribute_value_id)'), '=', count($array_attribute_value_ids))
+            ->get();
+        if($productFocusQuery->all()){
+            $productDetailUpdate = $productFocusQuery[0];
+            return response()->json(['status' => 'success', 'data' => $productDetailUpdate]);
+        }
     }
 
     public function cart()

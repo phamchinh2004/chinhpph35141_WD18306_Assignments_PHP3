@@ -12,43 +12,79 @@
             <h3>Trải nghiệm mua sắm cùng <b>e-SportsJacket</b></h3>
             <p class="text-black-50">Đã có hơn 10.000 khách hàng tin tưởng mua sắm</p>
         </div>
-        <form class="w-75 mt-3 mb-4" action="">
+        <form class="w-75 mt-3 mb-4" action="{{route('register')}}" method="post">
+            @csrf
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" id="fullname" placeholder="Nhập họ và tên">
+                <input class="form-control" type="text" name="fullname" placeholder="Nhập họ và tên">
                 <label for="fullname">Họ và tên</label>
+                @error('fullname')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="email" id="email" placeholder="Nhập email">
+                <input class="form-control" type="email" name="email" placeholder="Nhập email">
                 <label for="email">Email</label>
+                @error('email')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" id="address" placeholder="Nhập email">
+                <input class="form-control" type="text" name="address" placeholder="Nhập email">
                 <label for="address">Địa chỉ</label>
+                @error('address')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="number" id="phone" placeholder="Nhập email">
+                <input class="form-control" type="number" name="phone" placeholder="Nhập email">
                 <label for="phone">Số điện thoại</label>
+                @error('phone')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" id="username" placeholder="Nhập tên đăng nhập">
+                <input class="form-control" type="text" name="username" placeholder="Nhập tên đăng nhập">
                 <label for="username">Tên đăng nhập</label>
+                @error('username')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="password" id="password" placeholder="Nhập mật khẩu">
+                <input class="form-control" type="password" name="password" placeholder="Nhập mật khẩu">
                 <label for="password">Mật khẩu</label>
+                @error('password')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="password" id="repassword" placeholder="Nhập lại mật khẩu">
+                <input class="form-control" type="password" name="repassword" placeholder="Nhập lại mật khẩu">
                 <label for="repassword">Nhập lại mật khẩu</label>
+                @error('repassword')
+                <span class="text-danger" style="font-size:11px;">
+                    <strong>*{{$message}}</strong>
+                </span>
+                @enderror
             </div>
             <div class="mt-4 d-flex justify-content-center">
-                <button class="btn btn-success fs-5"><i class="fa-solid fa-plus fa-sm me-2"></i>Đăng ký ngay</button>
+                <button class="btn btn-primary fs-5" type="submit"><i class="fa-solid fa-plus fa-sm me-2"></i>Đăng ký ngay</button>
             </div>
             <div class="text-center mt-2">
                 <p>Hoặc</p>
             </div>
             <div class="d-flex justify-content-center">
-                <a class="btn btn-primary" href="{{route('login')}}">Đăng nhập ngay</a>
+                <a class="btn btn-success" href="{{route('login')}}">Đăng nhập ngay</a>
             </div>
         </form>
     </div>
