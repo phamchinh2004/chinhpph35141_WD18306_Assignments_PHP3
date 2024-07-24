@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('product_variants', function (Blueprint $table) {
             $table->id();
             $table->string('image')->nullable();
+            $table->integer('purchase_price');
+            $table->integer('sale_price');
             $table->integer('stock');
             $table->foreignIdFor(Product::class)->constrained();
             $table->boolean('is_active')->default(true);

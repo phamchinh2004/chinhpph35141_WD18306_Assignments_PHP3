@@ -61,13 +61,13 @@ class UserController extends Controller
         $array_attribute_value_id = [];
         $array_attribute_id = [];
         $array_attributes = [];
-        $attribute_value_id = ProductVariant::leftJoin('products as p', 'product_variants.product_id', '=', 'p.id')
+        $attribute_value_ids = ProductVariant::leftJoin('products as p', 'product_variants.product_id', '=', 'p.id')
             ->leftJoin('product_variant_attribute_values as pvv', 'product_variants.id', '=', 'pvv.product_variant_id')
             ->select('pvv.attribute_value_id as attribute_value_id')
             ->where('p.id', $id)
             ->groupBy('attribute_value_id')
             ->get();
-        foreach ($attribute_value_id as $attribute_value_id) {
+        foreach ($attribute_value_ids as $attribute_value_id) {
             if ($attribute_value_id->attribute_value_id != null) {
                 $array_attribute_value_id[] = $attribute_value_id->attribute_value_id;
             }

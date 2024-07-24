@@ -17,13 +17,13 @@
                     <img class="w-100 main-image" src="{{$productDetail->image}}" alt="">
                 </div>
                 <div class="row d-flex justify-content-center align-items-center mt-3 mb-3">
-                    <a href="#" class="col-2 pe-auto">
-                        <img class="w-100" src="{{$productDetail->image}}" alt="">
+                    <a class="col-2 pe-auto">
+                        <img class="w-100 sub_image_first" src="{{$productDetail->image}}" alt="">
                     </a>
                     @foreach ($productImages as $productImage)
                     @if ( $productImage->image)
-                    <a href="#" class="col-2 pe-auto">
-                        <img class="w-100" src="{{$productImage->image}}" alt="">
+                    <a class="col-2 pe-auto">
+                        <img class="w-100 sub_image_second" src="{{$productImage->image}}" alt="">
                     </a>
                     @endif
                     @endforeach
@@ -64,14 +64,16 @@
                         <div class="d-flex flex-row align-items-center pt-3 pb-3 ps-3">
                             <div class="d-flex align-items-center position-relative strikethough">
                                 <p class="border-bottom border-black mb-0" style="font-size:10px">đ</p>
-                                <p class="mb-0 update-purchar-price">{{$productDetail->purchase_price}}</p>
+                                <p class="mb-0 update-purchase-price">{{$productDetail->purchase_price}}</p>
                             </div>
                             <div class="d-flex align-items-center ms-3">
                                 <p class="border-bottom border-danger mb-1 fw-bold text-danger me-1">đ</p>
                                 <h3 class="mb-0 text-danger update-sale-price">{{$productDetail->sale_price}}</h3>
                             </div>
-                            <div class="d-flex align-items-center ms-3">
-                                <span class="badge bg-danger text-white">20% giảm</span>
+                            <div class="ms-3">
+                                <span class="badge bg-danger text-white d-flex align-items-center">
+                                    <p class="update-percent-discount m-0">{{100-($productDetail->sale_price/$productDetail->purchase_price*100)}}</p>% giảm
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -117,7 +119,8 @@
                             <input type="text" class="form-control text-align-center" style="width:60px;" value="1">
                             <button class="btn btn-outline-dark btn-white" style="width:40px;">+</button>
                         </form>
-                        <p class="ms-3"><p class="mb-0 update-stock me-1">3670</p>sản phẩm có sẵn</p>
+                        <p class="ms-3">
+                        <p class="mb-0 update-stock me-1">3670</p>sản phẩm có sẵn</p>
                     </div>
                     <div class="d-flex align-items-center mt-4">
                         <div class="me-4">

@@ -58,6 +58,9 @@
             color: white !important;
             font-weight: bold;
         }
+        .border{
+            border: 2px solid red;
+        }
     </style>
 </head>
 
@@ -201,55 +204,70 @@
                         flag++;
                         $(this).addClass('focused');
                         attribute_value_ids.push(attributeValueId);
+
                         console.log('Total_attributes:' + total_attributes);
                         console.log('Flag:' + flag);
                         // Action handling
-                        if (flag == total_attributes) {
-                            notifications('success', 'Đã cập nhật thông tin sản phẩm', 'Thành công');
-                            e.preventDefault();
-                            $.ajax({
-                                url: "{{route('userProductDetailFocused.show')}}",
-                                type: "POST",
-                                data: {
-                                    _token: "{{ csrf_token() }}",
-                                    attribute_value_ids: attribute_value_ids,
-                                    product_id: product_id
-                                },
-                                success: function(response) {
-                                    if (response.status == "success") {
-                                        var imageUrl=response.data['image'];
-                                        var purchar_price=response.data['purchar_price'];
-                                        var sale_price=response.data['sale_price'];
-                                        var stock=response.data['stock'];
-                                        console.log(response.data['image'])
-                                        if(imageUrl){
-                                            $('.main-image').attr('src', imageUrl);
-                                        }else{
-                                            console.log('Image url is null of undefind')
-                                        }
-                                        $('.update-purchar-price').text(purchar_price);
-                                        $('.update-sale-price').text(sale_price);
-                                        $('.update-stock').text(stock);
-                                    }else{
-                                        console.log('Response status is not success');
+                        // notifications('success', 'Đã cập nhật thông tin sản phẩm', 'Thành công');
+                        e.preventDefault();
+                        $.ajax({
+                            url: "{{route('userProductDetailFocused.show')}}",
+                            type: "POST",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                attribute_value_ids: attribute_value_ids,
+                                product_id: product_id
+                            },
+                            success: function(response) {
+                                if (response.status == "success") {
+                                    var imageUrl = response.data['image'];
+                                    var purchase_price = response.data['purchase_price'];
+                                    var sale_price = response.data['sale_price'];
+                                    var stock = response.data['stock'];
+                                    var percent_discount = (100 - (sale_price / purchase_price * 100)).toFixed(1);
+                                    console.log(purchase_price);
+                                    console.log(response.data['image'])
+                                    if (imageUrl) {
+                                        $('.main-image').attr('src', imageUrl);
+                                    } else {
+                                        console.log('Image url is null of undefind')
                                     }
-                                },
-                                error: function(xhr) {
-                                    console.error('Status:', xhr.status); // Mã trạng thái HTTP
-                                    console.error('Status Text:', xhr.statusText); // Mô tả trạng thái HTTP
-                                    console.error('Response Text:', xhr.responseText); // Nội dung phản hồi lỗi từ server
-                                    if (xhr.responseJSON) {
-                                        console.error('Response JSON:', xhr.responseJSON);
-                                    }
-                                    alert('Đã xảy ra lỗi trong quá trình xử lý yêu cầu.');
+                                    $('.update-purchar-price').text(purchase_price);
+                                    $('.update-sale-price').text(sale_price);
+                                    $('.update-stock').text(stock);
+                                    $('.update-percent-discount').text(percent_discount);
+                                } else {
+                                    $('.update-stock').text(0);
+                                    notifications('error', 'Sản phẩm không có sẵn', 'Hết hàng');
+                                    console.log('Response status is not success');
                                 }
-                            })
-                        }
+                            },
+                            error: function(xhr) {
+                                console.error('Status:', xhr.status);
+                                console.error('Status Text:', xhr.statusText);
+                                console.error('Response Text:', xhr.responseText); // Nội dung phản hồi lỗi từ server
+                                if (xhr.responseJSON) {
+                                    console.error('Response JSON:', xhr.responseJSON);
+                                }
+                                alert('Đã xảy ra lỗi trong quá trình xử lý yêu cầu.');
+                            }
+                        })
                     }
                     console.log('Id mới được chọn:' + attributeValueId);
                     console.log('Cờ:' + flag);
                     console.log('Mảng:' + attribute_value_ids);
                 }));
+                if($('.sub_image_second').hover(function(){
+                    $(this).addClass('border border-danger border-3');
+                    var get_image_src=$(this).attr('src');
+                    $('.main-image').attr('src',get_image_src);
+                    console.log(get_image_src);
+                }));
+                // if($('.sub_image_second').hover(function(){
+                //     $(this).remove('border');
+                //     var get_image_src=$(this).attr('src');
+                //     console.log(get_image_src);
+                // }));
         })
     </script>
 </body>
