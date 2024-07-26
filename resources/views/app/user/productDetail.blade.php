@@ -14,16 +14,16 @@
             <div class="d-flex flex-column w-50 justify-content-center border-dotted-end me-3">
                 @if ($productDetail->image)
                 <div>
-                    <img class="w-100 main-image" src="{{$productDetail->image}}" alt="">
+                    <img class="w-100 main-image xzoom" src="{{$productDetail->image}}" alt="" xoriginal="{{$productDetail->image}}">
                 </div>
-                <div class="row d-flex justify-content-center align-items-center mt-3 mb-3">
+                <div class="row d-flex justify-content-center align-items-center mt-3 mb-3 xzoom-thumbs">
                     <a class="col-2 pe-auto">
-                        <img class="w-100 sub_image_first" src="{{$productDetail->image}}" alt="">
+                        <img class="w-75 sub_image_first xzoom-gallery" src="{{$productDetail->image}}" alt="" xpreview="{{$productDetail->image}}">
                     </a>
                     @foreach ($productImages as $productImage)
                     @if ( $productImage->image)
                     <a class="col-2 pe-auto">
-                        <img class="w-100 sub_image_second" src="{{$productImage->image}}" alt="">
+                        <img class="w-75  sub_image_second xzoom-gallery" src="{{$productImage->image}}" alt="" xpreview="{{$productImage->image}}">
                     </a>
                     @endif
                     @endforeach
@@ -91,7 +91,7 @@
                     @foreach ($array_attributes as $attribute_item)
                     <div class="mt-4 d-flex flex-row align-items-center">
                         <p class="text-secondary mb-0 w-25">{{$attribute_item['name']}}</p>
-                        <div class="row row-cols-4 w-75 attribute_group">
+                        <div class="row row-cols-4 w-75 attribute_group" data-id="{{$attribute_item['id']}}">
                             @foreach ($attribute_item['attribute_values'] as $attribute_value_item)
                             <div class="col border-black border text-decoration-none text-black ms-3
                              w-auto border-secondary-subtle attribute_item attribute-value-hover cs-pt" data-id="{{$attribute_value_item['id']}}">
@@ -120,7 +120,7 @@
                             <button class="btn btn-outline-dark btn-white" style="width:40px;">+</button>
                         </form>
                         <p class="ms-3">
-                        <p class="mb-0 update-stock me-1">3670</p>sản phẩm có sẵn</p>
+                        <p class="mb-0 update-stock me-1">{{$total_stock}}</p>sản phẩm có sẵn</p>
                     </div>
                     <div class="d-flex align-items-center mt-4">
                         <div class="me-4">

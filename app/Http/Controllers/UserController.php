@@ -110,7 +110,10 @@ class UserController extends Controller
             ->where('product_variants.product_id', $id)
             ->groupBy('product_variants.image')
             ->get();
-        return view('app.user.productDetail', compact('productDetail', 'array_attributes', 'productImages'));
+        //Get sum stock product variants
+        $total_prices = ProductVariant::selectRaw('SUM(product_variants.stock) as total_stock')->where('product_variants.product_id', $id)->get();
+        $total_stock=$total_prices[0]->total_stock;
+        return view('app.user.productDetail', compact('productDetail', 'array_attributes', 'productImages','total_stock'));
     }
     public function updateInformationProduct(Request $request)
     {
@@ -126,7 +129,7 @@ class UserController extends Controller
             ->groupBy('pv.id')
             ->having(DB::raw('COUNT(product_variant_attribute_values.attribute_value_id)'), '=', count($array_attribute_value_ids))
             ->get();
-        if($productFocusQuery->all()){
+        if ($productFocusQuery->all()) {
             $productDetailUpdate = $productFocusQuery[0];
             return response()->json(['status' => 'success', 'data' => $productDetailUpdate]);
         }

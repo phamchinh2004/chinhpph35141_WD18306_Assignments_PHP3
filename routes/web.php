@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\VerifyEmailContrller;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdminMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,11 @@ Route::get('auth/login', [LoginController::class,'index'])->name('login');
 Route::post('auth/login', [LoginController::class,'login'])->name('login');
 Route::get('auth/logout', [LoginController::class,'logout'])->name('logout');
 
-Route::get('auth/register', [RegisterController::class,'index'])->name('register');
-Route::post('auth/register', [RegisterController::class,'register'])->name('register');
+Route::get('register', [RegisterController::class,'index'])->name('register');
+Route::post('auth/register', [RegisterController::class,'register'])->name('register.post');
+
+//-----------------------VERIFY_EMAIL-------------------------
+Route::get('auth/verify/{token}',[VerifyEmailContrller::class,'verify'])->name('verify.email');
 
 //--------------------------------USER----------------------------------
 Route::get('userHome/', [UserController::class, 'index'])->name('userHome.index');

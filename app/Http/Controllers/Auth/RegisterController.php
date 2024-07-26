@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyEmail;
+use App\Models\Information;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
@@ -23,12 +29,26 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'max:100'],
             'repassword' => ['required', 'string', 'max:100', 'same:password'],
         ]);
-        dd($data);
-        // $validate = Validator::make($request->all(), $data);
-        // if ($validate->fails()) {
-        //     return redirect()->back()->withErrors($validate)->withInput();
-        // }
-        // $request->session()->regenerate();
-        // return view('app.login');
+        $dataUser = [
+            'name' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'created_at' => Carbon::now()
+        ];
+        $user = User::create($dataUser);
+        $dataUserInfo = [
+            'full_name' => $request->fullname,
+            'phone_number' => $request->phone,
+            'address' => $request->address,
+            'email' => $request->email,
+            'account_id' => $user->id,
+            'created_at' => Carbon::now()
+        ];
+        $userInfo=Information::create($dataUserInfo);
+        \Illuminate\Support\Facades\Auth::login($user);
+        $request->session()->regenerate();
+        $token = Hash::make($user->mail);
+        Mail::to($user->email)->send(new VerifyEmail($token, $user->name));
+        return redirect()->intended('/');
     }
 }

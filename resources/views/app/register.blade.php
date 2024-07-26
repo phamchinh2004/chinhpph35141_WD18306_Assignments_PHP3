@@ -12,7 +12,7 @@
             <h3>Trải nghiệm mua sắm cùng <b>e-SportsJacket</b></h3>
             <p class="text-black-50">Đã có hơn 10.000 khách hàng tin tưởng mua sắm</p>
         </div>
-        <form class="w-75 mt-3 mb-4" action="{{route('register')}}" method="post">
+        <form class="w-75 mt-3 mb-4" action="{{route('register.post')}}" method="post">
             @csrf
             <div class="form-floating mt-3">
                 <input class="form-control" type="text" name="fullname" placeholder="Nhập họ và tên">

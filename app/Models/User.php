@@ -23,8 +23,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
-        'type'
+        'role',
+        'remember_token',
+        'created_at',
+        'updated_at'
     ];
 
     /**
@@ -46,7 +50,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    public function isAdmin(){
+    public function isAdmin()
+    {
         return $this->type == self::TYPE_ADMIN;
     }
 }
