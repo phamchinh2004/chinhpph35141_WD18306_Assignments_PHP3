@@ -16,11 +16,10 @@ class CheckAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // if (Auth::check() && Auth::user()->isAdmin()) {
-        //     return $next($request);
-        // } else {
-        //     abort(403);
-        // }
-        return $next($request);
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return $next($request);
+        } else {
+            abort(403);
+        }
     }
 }

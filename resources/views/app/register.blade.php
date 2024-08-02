@@ -7,6 +7,9 @@
         <a href="{{route('/')}}" class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none text-black">
             <i class="fa-solid fa-close fa-2xl"></i>
         </a>
+        @if(session('message'))
+        <p class="text-danger text-center">{{session('message')}}</p>
+        @endif
         <img class="rounded mt-3" src="{{ asset('image/logo-removebg.png') }}" alt="" width="100">
         <div class="mt-2 text-center">
             <h3>Trải nghiệm mua sắm cùng <b>e-SportsJacket</b></h3>
@@ -15,7 +18,7 @@
         <form class="w-75 mt-3 mb-4" action="{{route('register.post')}}" method="post">
             @csrf
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" name="fullname" placeholder="Nhập họ và tên">
+                <input class="form-control" type="text" name="fullname" value="{{old('fullname')}}" placeholder="Nhập họ và tên">
                 <label for="fullname">Họ và tên</label>
                 @error('fullname')
                 <span class="text-danger" style="font-size:11px;">
@@ -24,7 +27,7 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="email" name="email" placeholder="Nhập email">
+                <input class="form-control" type="email" name="email" value="{{old('email')}}" placeholder="Nhập email">
                 <label for="email">Email</label>
                 @error('email')
                 <span class="text-danger" style="font-size:11px;">
@@ -33,7 +36,7 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" name="address" placeholder="Nhập email">
+                <input class="form-control" type="text" name="address" value="{{old('address')}}" placeholder="Nhập địa chỉ">
                 <label for="address">Địa chỉ</label>
                 @error('address')
                 <span class="text-danger" style="font-size:11px;">
@@ -42,7 +45,7 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="number" name="phone" placeholder="Nhập email">
+                <input class="form-control" type="number" name="phone" value="{{old('phone')}}" placeholder="Nhập số điện thoại">
                 <label for="phone">Số điện thoại</label>
                 @error('phone')
                 <span class="text-danger" style="font-size:11px;">
@@ -51,7 +54,7 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="text" name="username" placeholder="Nhập tên đăng nhập">
+                <input class="form-control" type="text" name="username" value="{{old('username')}}" placeholder="Nhập tên đăng nhập">
                 <label for="username">Tên đăng nhập</label>
                 @error('username')
                 <span class="text-danger" style="font-size:11px;">
@@ -60,7 +63,7 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="password" name="password" placeholder="Nhập mật khẩu">
+                <input class="form-control" type="password" name="password" value="{{old('password')}}" placeholder="Nhập mật khẩu">
                 <label for="password">Mật khẩu</label>
                 @error('password')
                 <span class="text-danger" style="font-size:11px;">
@@ -69,9 +72,9 @@
                 @enderror
             </div>
             <div class="form-floating mt-3">
-                <input class="form-control" type="password" name="repassword" placeholder="Nhập lại mật khẩu">
-                <label for="repassword">Nhập lại mật khẩu</label>
-                @error('repassword')
+                <input class="form-control" type="password" name="password_confirmation" value="{{old('password_confirmation')}}" placeholder="Nhập lại mật khẩu">
+                <label for="password_confirmation">Nhập lại mật khẩu</label>
+                @error('password_confirmation')
                 <span class="text-danger" style="font-size:11px;">
                     <strong>*{{$message}}</strong>
                 </span>

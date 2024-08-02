@@ -17,11 +17,13 @@ class VerifyEmail extends Mailable
      * Create a new message instance.
      */
     public $token;
-    public $username;
-    public function __construct($token,$username)
+    public $fullname;
+    public $id;
+    public function __construct($token, $fullname, $id)
     {
         $this->token = $token;
-        $this->username = $username;
+        $this->fullname = $fullname;
+        $this->id = $id;
     }
 
     /**
@@ -41,9 +43,10 @@ class VerifyEmail extends Mailable
     {
         return new Content(
             view: 'app.mail.verifyemail',
-            with:[
-                'token'=>$this->token,
-                'username'=>$this->username
+            with: [
+                'token' => $this->token,
+                'fullname' => $this->fullname,
+                'id' => $this->id
             ]
         );
     }

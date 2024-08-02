@@ -10,6 +10,8 @@ class ProductVariant extends Model
     use HasFactory;
     protected $fillable = [
         'image',
+        'purchase_price',
+        'sale_price',
         'stock',
         'product_id',
         'is_active'

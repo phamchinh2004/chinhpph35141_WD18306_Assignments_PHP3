@@ -7,12 +7,16 @@ use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Cart;
 use App\Models\Category;
+use App\Models\Information;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantAttributeValue;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -22,7 +26,18 @@ class UserController extends Controller
      */
     public function index()
     {
+        //Get info user
+        $id_user_logined = null;
+        $user = null;
+        if (Auth::check()) {
+            $id_user_logined = Auth::user()->id;
+            $user = User::rightJoin('informations as info', 'users.id', '=', 'info.user_id')
+                ->where('info.user_id', '=', $id_user_logined)
+                ->first();
+        }
+        //Get all categories
         $categories = Category::all();
+        //Get all products
         $products = Product::leftJoin('order_details', 'order_details.product_id', '=', 'products.id')
             ->select('products.*', DB::raw('SUM(order_details.quantity) as total_quantity'))
             ->groupBy('products.id')
@@ -33,7 +48,7 @@ class UserController extends Controller
                 $product->total_quantity = 0;
             }
         }
-        return view('app.user.home', compact('categories', 'products'));
+        return view('app.user.home', compact('categories', 'products', 'user'));
     }
 
     /**
@@ -55,9 +70,27 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product, string $id)
+    public function show(string $id)
     {
-        //Handle find attributes
+        //Get all variant products
+        $product = Product::with('productVariants.productAttributeValueDetail.attributeValue')->find($id);
+        $array_variants = [];
+        if ($product) {
+            foreach ($product->productVariants as $productVariant) {
+                $attributeValues = [];
+                foreach ($productVariant->productAttributeValueDetail as $attributeValue) {
+                    $attributeValues[] = $attributeValue->attribute_value_id;
+                }
+                $variantAttributes  = [
+                    'variant_id' => $productVariant->id,
+                    'stock' => $productVariant->stock,
+                    'attribute_values' => $attributeValues
+                ];
+                $array_variants[] = $variantAttributes;
+            }
+        }
+        // dd($array_variants);
+        //Handle get all attributes
         $array_attribute_value_id = [];
         $array_attribute_id = [];
         $array_attributes = [];
@@ -89,6 +122,7 @@ class UserController extends Controller
             $array_attributes[$attribute_id] = [
                 'id' => $dataAttribute->id,
                 'name' => $dataAttribute->name,
+                'type' => $dataAttribute->type,
                 'attribute_values' => $dataAttribute->attributeValues->map(function ($value) {
                     return [
                         'id' => $value->id,
@@ -112,8 +146,8 @@ class UserController extends Controller
             ->get();
         //Get sum stock product variants
         $total_prices = ProductVariant::selectRaw('SUM(product_variants.stock) as total_stock')->where('product_variants.product_id', $id)->get();
-        $total_stock=$total_prices[0]->total_stock;
-        return view('app.user.productDetail', compact('productDetail', 'array_attributes', 'productImages','total_stock'));
+        $total_stock = $total_prices[0]->total_stock;
+        return view('app.user.productDetail', compact('productDetail', 'array_attributes', 'productImages', 'total_stock', 'array_variants'));
     }
     public function updateInformationProduct(Request $request)
     {
@@ -131,39 +165,218 @@ class UserController extends Controller
             ->get();
         if ($productFocusQuery->all()) {
             $productDetailUpdate = $productFocusQuery[0];
-            return response()->json(['status' => 'success', 'data' => $productDetailUpdate]);
+            $response = [
+                'status' => 'success',
+                'data' => $productDetailUpdate
+            ];
+            return response()->json($response);
         }
     }
 
     public function cart()
     {
-        $productCart = Cart::with('product')->get();
-        $total_payment = 0;
-        foreach ($productCart as $product) {
-            $total_payment += $product->product->sale_price;
+        $carts = Auth::user()->carts;
+        $cart_list = [];
+        foreach ($carts as $itemCart) {
+            $array_item_cart = [];
+            $array_item_cart['quantity'] = $itemCart->quantity;
+            $variants = $itemCart->productVariant;
+            $array_item_cart['product_name'] = ProductVariant::select('p.name')->rightJoin('products as p', 'product_variants.product_id', '=', 'p.id')->first()->name;
+            $array_item_cart['image'] = ProductVariant::select('p.image')->rightJoin('products as p', 'product_variants.product_id', '=', 'p.id')->first()->image;
+            $array_item_cart['purchase_price'] = $variants->purchase_price;
+            $array_item_cart['sale_price'] = $variants->sale_price;
+            $array_item_cart['stock'] = $variants->stock;
+            $array_item_cart['product_id'] = $variants->product_id;
+            $array_item_cart['variant_id'] = $variants->id;
+            $array_item_cart['id_cart'] = $itemCart->id;
+            $array_item_attribute_values = [];
+            $productAttributeValueDetail = ProductVariantAttributeValue::select('product_variant_attribute_values.*')->where('product_variant_attribute_values.product_variant_id', $variants->id)->get();
+            foreach ($productAttributeValueDetail as $itemProductAttributeValueDetail) {
+                $attributeValue = AttributeValue::select('attribute_values.value')->leftJoin('product_variant_attribute_values as pvv', 'attribute_values.id', '=', 'pvv.attribute_value_id')->where('pvv.id', $itemProductAttributeValueDetail->id)->get();
+                foreach ($attributeValue as $itemAttributeValue) {
+                    $array_item_attribute_values[] = $itemAttributeValue->value;
+                }
+            }
+            $array_item_cart['attribute_values'] = $array_item_attribute_values;
+            $cart_list[] = $array_item_cart;
         }
-        return view('app.user.cart', compact('productCart', 'total_payment'));
+        $total_payment = 0;
+        foreach ($cart_list as $item_cart) {
+            if ($item_cart['sale_price'] != null) {
+                $total_payment += $item_cart['sale_price'] * $item_cart['quantity'];
+            } else {
+                $total_payment += $item_cart['purchase_price'] * $item_cart['quantity'];
+            }
+        }
+        return view('app.user.cart', compact('cart_list', 'total_payment'));
     }
-    public function addToCart(string $id)
+    public function addToCart(string $variant_id, string $quantity)
     {
-        Cart::create([
-            'quantity' => 1,
-            'product_id' => $id,
-            'product_variant_id' => 1,
-            'account_id' => 1,
-            'created_at' => now()
-        ]);
+        $checkCart = Cart::with('productVariant')->where('product_variant_id', $variant_id)->where('user_id', Auth::user()->id)->first();
+        if ($checkCart) {
+            if ($checkCart->productVariant->stock < $checkCart->quantity + $quantity) {
+                $checkCart->quantity = $checkCart->productVariant->stock;
+            } else if ($checkCart->quantity + $quantity > 10) {
+                $checkCart->quantity = 10;
+            } else {
+                $checkCart->quantity = $checkCart->quantity + $quantity;
+            }
+            $checkCart->updated_at->now();
+            $checkCart->save();
+        } else {
+            Cart::create([
+                'quantity' => $quantity,
+                'product_variant_id' => $variant_id,
+                'user_id' => Auth::user()->id,
+                'created_at' => now()
+            ]);
+        }
         return redirect()->route('cart');
     }
-    public function payment()
+    public function updateCart(Request $request)
     {
-        $productsPayment = Cart::with('product')->get();
-        $total_payment = 0;
-        $shipping = 30000;
-        foreach ($productsPayment as $product) {
-            $total_payment += $product->product->sale_price;
+        try {
+            $variant_id = $request->input('variant_id');
+            $quantity = $request->input('quantity');
+            $cartInfor = Cart::select('carts.*', 'pv.stock')
+                ->leftJoin('product_variants as pv', 'carts.product_variant_id', '=', 'pv.id')
+                ->where('user_id', Auth::user()->id)
+                ->where('product_variant_id', $variant_id)
+                ->first();
+            if ($cartInfor) {
+                if ($cartInfor->stock <= $quantity) {
+                    $cartInfor->update([
+                        'quantity' => $cartInfor->stock,
+                        'updated_at' => now()
+                    ]);
+                } else {
+                    $cartInfor->update([
+                        'quantity' => $quantity,
+                        'updated_at' => now()
+                    ]);
+                }
+                $variants = ProductVariant::select('product_variants.id', 'product_variants.purchase_price', 'product_variants.sale_price', 'carts.quantity')
+                    ->leftJoin('carts', 'product_variants.id', '=', 'carts.product_variant_id')
+                    ->where('carts.user_id', Auth::user()->id)
+                    ->get();
+                $total_payment = 0;
+                $total_price = 0;
+                foreach ($variants as $itemVariant) {
+                    if ($itemVariant->id == $variant_id) {
+                        if ($itemVariant->sale_price != null) {
+                            $total_price = $cartInfor->quantity * $itemVariant->sale_price;
+                        } else {
+                            $total_price = $cartInfor->quantity * $itemVariant->purchase_price;
+                        }
+                    }
+                    if ($itemVariant->sale_price != null) {
+                        $total_payment +=  $itemVariant->quantity * $itemVariant->sale_price;
+                    } else {
+                        $total_payment +=  $itemVariant->quantity * $itemVariant->purchase_price;
+                    }
+                }
+                $response = [
+                    'status' => 'success',
+                    'new_quantity' => $cartInfor->quantity,
+                    'total_price' => $total_price,
+                    'total_payment' =>  $total_payment
+                ];
+            } else {
+                $response = [
+                    'status' => 'error',
+                    'message' => 'Cart item not found',
+                ];
+            }
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-        return view('app.user.payment', compact('productsPayment', 'total_payment', 'shipping'));
+    }
+    public function destroyCart(Request $request)
+    {
+        $cart_id = $request->input('cart_id');
+        if ($cart_id) {
+            $checkCart = Cart::find($cart_id);
+            if ($checkCart) {
+                $checkCart->delete();
+                $response = [
+                    'status' => 'success'
+                ];
+            } else {
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Không tìm thấy vật phẩm cần xóa!'
+                ];
+            }
+        }
+        $cart_array = $request->input('cart_array');
+        if ($cart_array) {
+            foreach ($cart_array as $cart_item) {
+                $checkCart = Cart::find($cart_item);
+                if ($checkCart) {
+                    $checkCart->delete();
+                    $response = [
+                        'status' => 'success'
+                    ];
+                } else {
+                    $response = [
+                        'status' => 'success',
+                        'message' => 'Không tìm thấy vật phẩm cần xóa!'
+                    ];
+                }
+            }
+        }
+        return response()->json($response);
+    }
+    public function payment(String $items)
+    {
+        if ($items) {
+            $items = explode(',', $items);
+            $array_payments = [];
+            $user_info = Information::where('user_id', Auth::user()->id)->where('is_active', 1)->first();
+            $total_payment = 0;
+            foreach ($items as $item) {
+                $array_item = [];
+                $itemInfo = Cart::with('productVariant')->where('carts.id', $item)->first();
+                if ($itemInfo) {
+                    $productName = ProductVariant::select('p.name', 'p.image')
+                        ->leftJoin('products as p', 'product_variants.product_id', '=', 'p.id')
+                        ->where('product_variants.id', $itemInfo->product_variant_id)
+                        ->first();
+                    $array_item['name'] = $productName->name;
+                    $array_item['image'] = $productName->image;
+                    $array_item_attribute_values = [];
+                    $productAttributeValueDetail = ProductVariantAttributeValue::select('product_variant_attribute_values.*')->where('product_variant_attribute_values.product_variant_id', $itemInfo->product_variant_id)->get();
+                    foreach ($productAttributeValueDetail as $itemProductAttributeValueDetail) {
+                        $attributeValue = AttributeValue::select('attribute_values.value')->leftJoin('product_variant_attribute_values as pvv', 'attribute_values.id', '=', 'pvv.attribute_value_id')->where('pvv.id', $itemProductAttributeValueDetail->id)->get();
+                        foreach ($attributeValue as $itemAttributeValue) {
+                            $array_item_attribute_values[] = $itemAttributeValue->value;
+                        }
+                    }
+                    $array_item['attribute_values'] = $array_item_attribute_values;
+                    $array_item['purchase_price'] = $itemInfo->productVariant->purchase_price;
+                    $array_item['sale_price'] = $itemInfo->productVariant->sale_price;
+                    $array_item['quantity'] = $itemInfo->quantity;
+                    if ($array_item['sale_price'] != null) {
+                        $array_item['total_price'] = $itemInfo->quantity * $itemInfo->productVariant->sale_price;
+                        $total_payment += $itemInfo->quantity * $itemInfo->productVariant->sale_price;
+                    } else {
+                        $array_item['total_price'] = $itemInfo->quantity * $itemInfo->productVariant->purchase_price;
+                        $total_payment += $itemInfo->quantity * $itemInfo->productVariant->sale_price;
+                    }
+                    $array_payments[] = $array_item;
+                    $transport_fee = 30000;
+                    $total_payment_end = $total_payment - $transport_fee;
+                } else {
+                    return redirect()->route('cart');
+                }
+
+                // dd($array_payments);
+            }
+        } else {
+            return redirect()->route('cart');
+        }
+        return view('app.user.payment', compact('array_payments', 'total_payment', 'user_info', 'total_payment_end', 'transport_fee'));
     }
     public function order()
     {
@@ -180,7 +393,7 @@ class UserController extends Controller
             'shipping_voucher' => 0,
             'voucher' => 0,
             'total_payment' => $total_payment,
-            'account_id' => 1,
+            'user_id' => 1,
             'created_at' => now()
         ]);
         foreach ($productsPayment as $product) {
@@ -195,10 +408,10 @@ class UserController extends Controller
             ]);
         }
         foreach ($productsPayment as $product) {
-            Cart::where('account_id', 1)->delete();
+            Cart::where('user_id', 1)->delete();
         }
         $orderDetail = Order::with('orderDetails.product')
-            ->where('account_id', 1)
+            ->where('user_id', 1)
             ->where('id', $order->id)
             // ->where('id', 1)
             ->first();

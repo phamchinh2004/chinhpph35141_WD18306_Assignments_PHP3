@@ -19,9 +19,9 @@
                         <p class="m-0 mt-4 fs-5 text-danger">Địa chỉ nhận hàng</p>
                     </div>
                     <div class="d-flex flex-row align-items-center mt-3">
-                        <h5 class="m-0 me-2">Phạm Chình</h5>
-                        <h5 class="m-0 me-3">(+84) 987654321</h5>
-                        <p class="m-0 me-3">Số 24, Ngõ 199 Cầu Diễn, Phường Phúc Diễn, Quận Bắc Từ Liêm, Hà Nội
+                        <h5 class="m-0 me-2">{{$user_info->full_name}}</h5>
+                        <h5 class="m-0 me-3">(+84) {{$user_info->phone_number}}</h5>
+                        <p class="m-0 me-3">{{$user_info->address}}
                         </p>
                         <span class="badge bg-white text-danger border-danger border me-3">Mặc định</span>
                         <div class="btn btn-white btn-outline-dark">Thay đổi</div>
@@ -39,27 +39,37 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($productsPayment as $product)
+                            @foreach ($array_payments as $item)
 
                             <tr class="">
                                 <td class="">
                                     <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{$product->product->image}}" alt="" width="110">
+                                        <img class="me-3" src="{{$item['image']}}" alt="" width="110">
                                         <h6 class="form-check-label">
-                                            {{$product->product->name}}
+                                            {{$item['name']}}
                                         </h6>
                                     </div>
                                 </td>
                                 <td class="centered">
                                     <div class="d-flex text-center flex-column h-auto">
                                         <span>Phân loại hàng:</span>
-                                        <span class="fw-bold">Faker,M</span>
+                                        <span class="fw-bold">
+                                            @foreach ($item['attribute_values'] as $attribute_value)
+                                            {{$attribute_value}}
+                                            @endforeach
+                                        </span>
                                     </div>
                                 </td>
-                                <td class="centered text-center">{{$product->product->sale_price}}đ</td>
-                                <td class="centered text-center">{{$product->quantity}}</td>
+                                <td class="centered text-center currency">
+                                    @if ($item['sale_price']!=null)
+                                    {{$item['sale_price']}}
+                                    @else
+                                    {{$item['purchase_price']}}
+                                    @endif
+                                </td>
+                                <td class="centered text-center">{{$item['quantity']}}</td>
 
-                                <td class="centered text-center text-danger">{{$product->product->sale_price}}đ</td>
+                                <td class="centered text-center text-danger currency">{{$item['total_price']}}</td>
                             </tr>
 
                             @endforeach
@@ -93,31 +103,31 @@
                             <tbody>
                                 <tr>
                                     <td>Tổng tiền hàng</td>
-                                    <th>₫{{$total_payment}}</th>
+                                    <th class="currency">{{$total_payment}}</th>
                                 </tr>
                                 <tr>
                                     <td>Phí vận chuyển
                                     </td>
-                                    <th>₫{{$shipping}}</th>
+                                    <th class="currency">{{$transport_fee}}</th>
                                 </tr>
                                 <tr>
                                     <td>Giảm phí vận chuyển
                                     </td>
-                                    <th>-₫0</th>
+                                    <th class="currency">0</th>
                                 </tr>
                                 <tr>
                                     <td>Voucher từ eSportsJacket
                                     </td>
-                                    <th>-₫0</th>
+                                    <th class="currency">0</th>
                                 </tr>
                                 <tr>
                                     <td class="centered">Tổng thanh toán
                                     </td>
-                                    <th class="fs-4 text-danger fw-bold">₫{{$shipping+$total_payment}}</th>
+                                    <th class="fs-4 text-danger fw-bold currency">{{$total_payment_end}}</th>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="text-center">
-                                        <a href="{{route('userOrder')}}" class="btn btn-danger ps-5 pe-5 pt-2 pb-2 fw-bold">
+                                        <a href="{{route('order')}}" class="btn btn-danger ps-5 pe-5 pt-2 pb-2 fw-bold">
                                             Đặt hàng
                                         </a>
                                     </th>

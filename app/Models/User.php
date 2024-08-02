@@ -3,12 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
     const TYPE_ADMIN = "admin";
@@ -21,7 +25,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'email_verified_at',
         'password',
@@ -53,5 +57,15 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->type == self::TYPE_ADMIN;
+    }
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmail($this->email, $this->fullname, 'Cảm ơn bạn đã đăng ký tài khoản!'));
+    }
+    public function informations(){
+        return $this->hasMany(Information::class);
+    }
+    public function carts(){
+        return $this->hasMany(Cart::class);
     }
 }

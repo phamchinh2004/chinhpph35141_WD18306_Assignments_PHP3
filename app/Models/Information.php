@@ -14,13 +14,13 @@ class Information extends Model
         'phone_number',
         'address',
         'email',
-        'account_id',
+        'user_id',
         'is_active',
         'created_at',
         'updated_at'
     ];
-    public function account()
+    public function user()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(User::class);
     }
 }
