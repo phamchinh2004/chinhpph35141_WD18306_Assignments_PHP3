@@ -347,9 +347,9 @@ class UserController extends Controller
                     $array_item['name'] = $productName->name;
                     $array_item['image'] = $productName->image;
                     $array_item_attribute_values = [];
-                    $productAttributeValueDetail = ProductVariantAttributeValue::select('product_variant_attribute_values.*')->where('product_variant_attribute_values.product_variant_id', $itemInfo->product_variant_id)->get();
-                    foreach ($productAttributeValueDetail as $itemProductAttributeValueDetail) {
-                        $attributeValue = AttributeValue::select('attribute_values.value')->leftJoin('product_variant_attribute_values as pvv', 'attribute_values.id', '=', 'pvv.attribute_value_id')->where('pvv.id', $itemProductAttributeValueDetail->id)->get();
+                    $variantAttributeValueDetail = ProductVariantAttributeValue::select('product_variant_attribute_values.*')->where('product_variant_attribute_values.product_variant_id', $itemInfo->product_variant_id)->get();
+                    foreach ($variantAttributeValueDetail as $itemVariantAttributeValueDetail) {
+                        $attributeValue = AttributeValue::select('attribute_values.value')->leftJoin('product_variant_attribute_values as pvv', 'attribute_values.id', '=', 'pvv.attribute_value_id')->where('pvv.id', $itemVariantAttributeValueDetail->id)->get();
                         foreach ($attributeValue as $itemAttributeValue) {
                             $array_item_attribute_values[] = $itemAttributeValue->value;
                         }
