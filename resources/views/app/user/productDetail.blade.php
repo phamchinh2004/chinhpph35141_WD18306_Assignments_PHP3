@@ -56,7 +56,7 @@
                         </div>
                         <div class="d-flex align-items-center">
                             <a class="text-decoration-none" href="">
-                                <p class="mb-0 text-black">Tố cáo</p>
+                                <p class="mb-0 text-black">Báo cáo</p>
                             </a>
                         </div>
                     </div>

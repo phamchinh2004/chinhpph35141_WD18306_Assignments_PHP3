@@ -80,7 +80,20 @@
                             <i class="fa-solid fa-ticket fa-md me-2"></i>
                             <h5 class="m-0">VOUCHER</h5>
                         </div>
-                        <button class="btn btn-white btn-outline-dark">Chọn voucher</button>
+                        <div class="d-flex flex-row align-items-center">
+                            <span class="badge value_voucher_base"></span>
+                        </div>
+                        <span class="btn btn-white btn-outline-dark voucher-click">Chọn voucher</span>
+                    </div>
+                    <div class="d-flex flex-row justify-content-around mt-4">
+                        <div class="d-flex flex-row align-items-center">
+                            <i class="fa-solid fa-ticket fa-md me-2"></i>
+                            <h5 class="m-0">FREESHIP VOUCHER</h5>
+                        </div>
+                        <div class="d-flex flex-row align-items-center">
+                            <span class="badge value_shipping_voucher_base"></span>
+                        </div>
+                        <span class="btn btn-white btn-outline-dark freeship-voucher-click">Chọn voucher</span>
                     </div>
                     <div class="d-flex flex-row justify-content-around align-items-center mt-4">
                         <div class="d-flex flex-row align-items-center">
@@ -113,23 +126,28 @@
                                 <tr>
                                     <td>Giảm phí vận chuyển
                                     </td>
-                                    <th class="currency">0</th>
+                                    <th class="reduce_shipping_costs currency">0</th>
                                 </tr>
                                 <tr>
-                                    <td>Voucher từ eSportsJacket
+                                    <td class="">Voucher từ e-SportsJacket
                                     </td>
-                                    <th class="currency">0</th>
+                                    <th>
+                                        <div class="d-flex flex-row">
+                                            <p class="m-0 currency reduce_voucher_costs me-2">0</p>
+                                            <p class="m-0 currency detail_reduce_voucher_costs text-success"></p>
+                                        </div>
+                                    </th>
                                 </tr>
                                 <tr>
-                                    <td class="centered">Tổng thanh toán
+                                    <td class="centered fw-bold">Tổng thanh toán
                                     </td>
-                                    <th class="fs-4 text-danger fw-bold currency">{{$total_payment_end}}</th>
+                                    <th class="fs-4 text-danger fw-bold currency total_payment">{{$total_payment_end}}</th>
                                 </tr>
                                 <tr>
                                     <th colspan="2" class="text-center">
-                                        <a href="{{route('order')}}" class="btn btn-danger ps-5 pe-5 pt-2 pb-2 fw-bold">
+                                        <span class="btn btn-danger ps-5 pe-5 pt-2 pb-2 fw-bold payment_click">
                                             Đặt hàng
-                                        </a>
+                                        </span>
                                     </th>
                                 </tr>
                             </tbody>
@@ -137,6 +155,59 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="overlay"></div>
+    <div class="form-voucher border border-dark rounded bg-dark text-white form_voucher_css form_voucher">
+        <span class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none btn_close_form_css close_form_voucher">
+            <i class="fa-solid fa-close fa-2xl text-white"></i>
+        </span>
+        <div class="p-4 ">
+            @foreach ($listVoucher as $itemVoucher)
+            <div class="d-flex flex-row align-items-center justify-content-between border border-white p-2 rounded mb-3 item_voucher bg-dark">
+                <div class="w-25 me-2">
+                    <img src="{{$itemVoucher->image}}" alt="" class="w-100">
+                </div>
+                <div class="w-50">
+                    <div class="lh-lg">
+                        <h5 class="m-0">{{$itemVoucher->name}}</h5>
+                        <span class="badge border border-white">Code: {{$itemVoucher->code}}</span>
+                        <div class="d-flex flex-row">Đơn tối thiểu: <p class="mb-0 ms-1 currency">{{$itemVoucher->minimum_order_value}}</p>
+                        </div>
+                        <span class="badge mb-0 p-0">HSD: {{$itemVoucher->end_date}}</>
+                    </div>
+                </div>
+                <div class="w-25">
+                    <span class="btn btn-dark text-dark bg-white use_voucher" data-id="{{$itemVoucher->id}}" data-type="{{$itemVoucher->type}}" data-amount="{{$itemVoucher->amount}}" data-name="{{$itemVoucher->name}}" data-minimum_order_value="{{$itemVoucher->minimum_order_value}}">Áp dụng</span>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    <div class="form-voucher border border-dark rounded bg-dark text-white form_voucher_css form_freeship_voucher">
+        <span class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none btn_close_form_css close_form_freeship_voucher">
+            <i class="fa-solid fa-close fa-2xl text-white"></i>
+        </span>
+        <div class="p-4">
+            @foreach ($listFreeshipVoucher as $itemVoucher)
+            <div class="d-flex flex-row align-items-center border border-white p-2 rounded mb-3 freeship_item_voucher">
+                <div class="w-25 me-2 d-flex flex-row align-items-center">
+                    <img src="{{$itemVoucher->image}}" alt="" class="w-100">
+                </div>
+                <div class="w-50">
+                    <div class="lh-lg">
+                        <h5 class="m-0">{{$itemVoucher->name}}</h5>
+                        <span class="badge border border-white">Code: {{$itemVoucher->code}}</span>
+                        <div class="d-flex flex-row">Đơn tối thiểu: <p class="mb-0 ms-1 currency">{{$itemVoucher->minimum_order_value}}</p>
+                        </div>
+                        <span class="badge mb-0 p-0">HSD: {{$itemVoucher->end_date}}</span>
+                    </div>
+                </div>
+                <div class="w-25">
+                    <span class="btn btn-white text-dark bg-white use_freeship_voucher" data-id="{{$itemVoucher->id}}" data-type="{{$itemVoucher->type}}" data-amount="{{$itemVoucher->amount}}" data-name="{{$itemVoucher->name}}" data-minimum_order_value="{{$itemVoucher->minimum_order_value}}">Áp dụng</span>
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 </div>

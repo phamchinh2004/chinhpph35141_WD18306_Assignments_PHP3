@@ -9,5 +9,9 @@
 
 .scroll {
     overflow-y: auto;
+    scrollbar-color: transparent transparent;
     max-height: 600px;
+}
+.scroll::-webkit-scrollbar{
+    display: none;
 }

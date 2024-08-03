@@ -82,10 +82,10 @@
                     </a>
                     <div class="d-flex flex-column justify-content-center align-items-center">
                         <div class="text-decoration-line-through mb-1 d-flex flex-row">
-                            <p class=" currency">{{$product->purchase_price}}</p>đ
+                            <p class=" currency">{{$product->purchase_price}}</p>
                         </div>
                         <div class="fs-5 fw-bold d-flex flex-row">
-                            <p class=" currency">{{$product->sale_price}}</p>đ
+                            <p class=" currency">{{$product->sale_price}}</p>
                         </div>
                         <p>Đã bán: {{$product->total_quantity}}</p>
                     </div>

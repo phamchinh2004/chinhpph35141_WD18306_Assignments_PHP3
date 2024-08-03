@@ -43,7 +43,7 @@ class RegisterController extends Controller
                 'phone_number' => $request->phone,
                 'address' => $request->address,
                 'email' => $request->email,
-                'account_id' => $user->id,
+                'user_id' => $user->id,
                 'created_at' => Carbon::now(),
             ];
             $userInfo = Information::create($dataUserInfo);

@@ -112,6 +112,45 @@
                 border-color: red;
             }
         }
+
+        .form_voucher_css {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 500px;
+            overflow-y: scroll;
+            scrollbar-color: transparent transparent;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            /* Màu nền mờ */
+            z-index: 999;
+        }
+
+        .form_voucher_css::-webkit-scrollbar {
+            display: none;
+        }
+
+        .btn_close_form_css {
+            cursor: pointer;
+        }
+
+        .item_voucher,
+        .freeship_item_voucher {
+            height: 160px;
+        }
     </style>
 </head>
 
@@ -173,7 +212,7 @@
         </div>
     </header>
     <!-- CONTAINER -->
-    <div style="padding-top: 101px;">
+    <div style="padding-top: 101px;" class="text-nowrap">
         @yield('content')
     </div>
     <!-- FOOTER -->
@@ -812,7 +851,305 @@
                     notifications('warning', 'Vui lòng chọn sản phẩm cần thanh toán!', 'Chưa chọn sản phẩm!');
                 }
             })
+            //-------------------------------------------VOUCHER-------------------------------------------
+            var voucher_click = false;
+            var freeship_voucher_click = false;
 
+            var voucher_id_focused = null;
+            var freeship_voucher_id_focused = null;
+
+            var amount_reduce_voucher = 0;
+            var amount_reduce_freeship_voucher = 0;
+
+            var total_payment_base = $('.total_payment').text(); //Tổng tiền cần thanh toán gốc
+
+            var value_voucher_base = $('.value_voucher_base').text(); //Phần hiển thị tên mã giảm giá
+            var value_shipping_voucher_base = $('.value_shipping_voucher_base').text();
+            console.log(value_shipping_voucher_base);
+            
+
+            var reduce_voucher_costs = $('.reduce_voucher_costs').text(); //Phần hiển thị giảm được bao nhiêu tiền/%
+            var reduce_shipping_costs = $('.reduce_shipping_costs').text();
+
+            $('.detail_reduce_voucher_costs').hide(); //Ẩn chỉ tiết giảm được bao nhiêu tiền
+
+            $('.close_form_voucher').click(function() { //Phần đóng
+                $('.form_voucher').hide();
+                $('.overlay').hide();
+            })
+            $('.close_form_freeship_voucher').click(function() {
+                $('.form_freeship_voucher').hide();
+                $('.overlay').hide();
+            })
+
+            $('.voucher-click').click(function() { //Phần mở
+                $('.form_voucher').show();
+                $('.overlay').show();
+            })
+            $('.freeship-voucher-click').click(function() {
+                $('.form_freeship_voucher').show();
+                $('.overlay').show();
+            })
+
+            $(document).on('click', '.use_voucher', function() {
+                // alert('abc');
+                var voucher_id = $(this).data('id');
+                var voucher_type = $(this).data('type');
+                var voucher_amount = $(this).data('amount');
+                var voucher_name = $(this).data('name');
+                var voucher_minimum_order_value = $(this).data('minimum_order_value');
+                var value_total_payment = total_payment_base;
+                value_total_payment = parseFloat(value_total_payment.replace(/[^0-9]/g, ''));
+                if (!voucher_click) {
+                    if (value_total_payment > voucher_minimum_order_value) {
+                        if (voucher_type == 'percent') {
+                            amount_reduce_voucher = value_total_payment * voucher_amount / 100;
+
+                            $('.detail_reduce_voucher_costs').text(value_total_payment * voucher_amount / 100).show();
+
+                            value_total_payment = value_total_payment - (value_total_payment * voucher_amount / 100) - amount_reduce_freeship_voucher;
+
+                            $('.reduce_voucher_costs').text('-' + voucher_amount + '%').removeClass('currency');
+
+                            $('.total_payment').text(value_total_payment);
+                            currency();
+
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')');
+                            if (freeship_voucher_click) {
+                                var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                                $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                            }
+
+
+                        } else {
+                            amount_reduce_voucher = voucher_amount;
+
+                            value_total_payment = value_total_payment - amount_reduce_voucher - amount_reduce_freeship_voucher;
+
+                            $('.detail_reduce_voucher_costs').text(amount_reduce_voucher);
+
+                            $('.total_payment').text(value_total_payment);
+                            currency();
+
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
+                            if (freeship_voucher_click) {
+                                var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                                $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                            }
+
+                            $('.reduce_voucher_costs').hide();
+                        }
+
+                        $('.value_voucher_base').text(voucher_name).addClass('text-success');
+
+                        voucher_click = true;
+                        voucher_id_focused = voucher_id;
+                        $(this).removeClass('btn btn-dark text-dark bg-white use_voucher').addClass('btn btn-danger text-white bg-danger cancel_use_voucher').text('Bỏ chọn');
+
+                        $('.form_voucher').hide();
+                        $('.overlay').hide();
+
+                        notifications('success', 'Áp dụng mã giảm giá thành công!', 'Thành công!');
+                    } else {
+                        notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
+                    }
+                } else {
+                    if ($('.cancel_use_voucher').data('id') == voucher_id_focused) {
+                        $('.cancel_use_voucher').addClass('use_voucher');
+                        $('.cancel_use_voucher').removeClass('btn btn-danger text-white bg-danger');
+                        $('.cancel_use_voucher').addClass('btn btn-dark text-dark bg-white');
+                        $('.cancel_use_voucher').text('Áp dụng');
+                        $('.cancel_use_voucher').removeClass('cancel_use_voucher');
+                    }
+                    if (value_total_payment > voucher_minimum_order_value) {
+                        if (voucher_type == 'percent') {
+                            amount_reduce_voucher = value_total_payment * voucher_amount / 100;
+                            $('.reduce_voucher_costs').text('-' + voucher_amount + '%');
+                            $('.reduce_voucher_costs').removeClass('currency');
+                            $('.reduce_voucher_costs').show();
+
+                            $('.detail_reduce_voucher_costs').text(value_total_payment * voucher_amount / 100).show();
+                            $('.detail_reduce_voucher_costs')
+                            value_total_payment = value_total_payment - (value_total_payment * voucher_amount / 100) - amount_reduce_freeship_voucher;
+
+                            $('.total_payment').text(value_total_payment);
+
+                            currency();
+
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')');
+                            if (freeship_voucher_click) {
+                                var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                                $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                            }
+
+                            $('.value_voucher_base').text(voucher_name).show();
+                        } else {
+                            amount_reduce_voucher = voucher_amount;
+                            $('.detail_reduce_voucher_costs').text(amount_reduce_voucher);
+
+                            value_total_payment = value_total_payment - amount_reduce_voucher - amount_reduce_freeship_voucher;
+                            $('.total_payment').text(value_total_payment);
+
+                            $('.value_voucher_base').show().text(voucher_name);
+
+                            currency();
+
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
+                            if (freeship_voucher_click) {
+                                var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                                $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                            }
+
+                            $('.reduce_voucher_costs').hide();
+                        }
+                        $('.value_voucher_base').text(voucher_name).addClass('text-success');
+                        voucher_click = true;
+                        voucher_id_focused = voucher_id;
+                        $(this).removeClass('btn btn-dark text-dark bg-white use_voucher').addClass('btn btn-danger text-white bg-danger cancel_use_voucher').text('Bỏ chọn');
+
+                        $('.form_voucher').hide();
+                        $('.overlay').hide();
+
+                        notifications('success', 'Áp dụng mã giảm giá thành công!', 'Thành công!');
+                    } else {
+                        notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
+                    }
+                }
+            })
+            $(document).on('click', '.cancel_use_voucher', function() {
+                if ($(this).data('id') == voucher_id_focused) {
+                    $(this).removeClass('btn btn-danger text-white bg-danger cancel_use_voucher').addClass('btn btn-dark text-dark bg-white use_voucher').text('Áp dụng');
+                }
+                var value_total_payment = total_payment_base;
+                value_total_payment = parseFloat(value_total_payment.replace(/[^0-9]/g, ''));
+                $('.total_payment').text(value_total_payment - amount_reduce_freeship_voucher);
+                $('.reduce_voucher_costs').text(reduce_voucher_costs);
+                $('.value_voucher_base').text(value_voucher_base);
+                currency();
+                if (freeship_voucher_click) {
+                    var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                    $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                }
+                voucher_click = false;
+                voucher_id_focused = null;
+                amount_reduce_voucher = 0;
+
+                $('.detail_reduce_voucher_costs').text(null);
+                $('.reduce_voucher_costs').show();
+
+                $('.form_voucher').hide();
+                $('.overlay').hide();
+            });
+
+            $(document).on('click', '.use_freeship_voucher', function() {
+                var voucher_id = $(this).data('id');
+                var voucher_amount = $(this).data('amount');
+                var voucher_name = $(this).data('name');
+                var voucher_minimum_order_value = $(this).data('minimum_order_value');
+                var value_total_payment = total_payment_base;
+                value_total_payment = parseFloat(value_total_payment.replace(/[^0-9]/g, ''));
+                amount_reduce_freeship_voucher = voucher_amount;
+                if (!freeship_voucher_click) {
+                    if (value_total_payment > voucher_minimum_order_value) {
+
+                        $('.total_payment').text(value_total_payment - amount_reduce_voucher - voucher_amount);
+
+                        $('.reduce_shipping_costs').text(amount_reduce_freeship_voucher).addClass('text-success');
+
+                        currency();
+
+                        var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                        $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                        if (voucher_click) {
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
+                        }
+
+                        $('.value_shipping_voucher_base').text(voucher_name).addClass('text-success');
+
+                        freeship_voucher_click = true;
+                        freeship_voucher_id_focused = voucher_id;
+
+                        $(this).removeClass('btn btn-dark text-dark bg-white use_freeship_voucher').addClass('btn btn-danger text-white bg-danger cancel_use_freeship_voucher').text('Bỏ chọn');
+
+                        $('.form_freeship_voucher').hide();
+                        $('.overlay').hide();
+
+                        notifications('success', 'Áp dụng mã giảm phí vận chuyển thành công!', 'Thành công!');
+
+                    } else {
+                        notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
+                    }
+                } else {
+                    if ($('.cancel_use_freeship_voucher').data('id') == freeship_voucher_id_focused) {
+                        $('.cancel_use_freeship_voucher').addClass('use_freeship_voucher');
+                        $('.cancel_use_freeship_voucher').removeClass('btn btn-danger text-white bg-danger');
+                        $('.cancel_use_freeship_voucher').addClass('btn btn-dark text-dark bg-white');
+                        $('.cancel_use_freeship_voucher').text('Áp dụng');
+                        $('.cancel_use_freeship_voucher').removeClass('cancel_use_freeship_voucher');
+                    }
+                    if (value_total_payment > voucher_minimum_order_value) {
+
+                        $('.total_payment').text(value_total_payment - amount_reduce_voucher - voucher_amount);
+
+                        $('.reduce_shipping_costs').text(amount_reduce_freeship_voucher).addClass('text-success');
+
+                        currency();
+
+                        var detail_reduce_shipping_costs = $('.reduce_shipping_costs').text();
+                        $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
+                        if (voucher_click) {
+                            var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                            $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
+                        }
+
+                        $('.value_shipping_voucher_base').text(voucher_name).addClass('text-success');
+
+                        freeship_voucher_click = true;
+                        freeship_voucher_id_focused = voucher_id;
+
+                        $(this).removeClass('btn btn-dark text-dark bg-white use_freeship_voucher').addClass('btn btn-danger text-white bg-danger cancel_use_freeship_voucher').text('Bỏ chọn');
+
+                        $('.form_freeship_voucher').hide();
+                        $('.overlay').hide();
+
+                        notifications('success', 'Áp dụng mã giảm phí vận chuyển thành công!', 'Thành công!');
+
+                    } else {
+                        notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
+                    }
+                }
+            });
+
+            $(document).on('click', '.cancel_use_freeship_voucher', function() {
+                if ($(this).data('id') == freeship_voucher_id_focused) {
+                    $(this).removeClass('btn btn-danger text-white bg-danger cancel_use_freeship_voucher').addClass('btn btn-dark text-dark bg-white use_freeship_voucher').text('Áp dụng');
+                }
+                var value_total_payment = total_payment_base;
+                value_total_payment = parseFloat(value_total_payment.replace(/[^0-9]/g, ''));
+                $('.total_payment').text(value_total_payment - amount_reduce_voucher);
+                $('.reduce_shipping_costs').text(reduce_shipping_costs).removeClass('text-success');
+                $('.value_shipping_voucher_base').text(value_shipping_voucher_base);
+                currency();
+                if (voucher_click) {
+                    var detail_reduce_voucher_costs = $('.detail_reduce_voucher_costs').text();
+                    $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
+                }
+                freeship_voucher_click = false;
+                freeship_voucher_id_focused = null;
+                amount_reduce_freeship_voucher = 0;
+
+                $('.form_freeship_voucher').hide();
+                $('.overlay').hide();
+            });
+
+            $('.payment_click').click(function() {
+                location.reload();
+            })
         })
     </script>
 </body>

@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantAttributeValue;
 use App\Models\User;
+use App\Models\Voucher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -366,7 +367,10 @@ class UserController extends Controller
                     }
                     $array_payments[] = $array_item;
                     $transport_fee = 30000;
-                    $total_payment_end = $total_payment - $transport_fee;
+                    $total_payment_end = $total_payment + $transport_fee;
+                    $listVoucher = Voucher::where('type', '!=', 'free_ship')->where('is_active', 1)->get();
+                    $listFreeshipVoucher = Voucher::where('type', 'free_ship')->where('is_active', 1)->get();
+                    $_SESSION['payment'] = $array_payments;
                 } else {
                     return redirect()->route('cart');
                 }
@@ -376,7 +380,8 @@ class UserController extends Controller
         } else {
             return redirect()->route('cart');
         }
-        return view('app.user.payment', compact('array_payments', 'total_payment', 'user_info', 'total_payment_end', 'transport_fee'));
+        // dd($_SESSION['payment']);
+        return view('app.user.payment', compact('array_payments', 'total_payment', 'user_info', 'total_payment_end', 'transport_fee', 'listVoucher', 'listFreeshipVoucher'));
     }
     public function order()
     {
@@ -413,7 +418,6 @@ class UserController extends Controller
         $orderDetail = Order::with('orderDetails.product')
             ->where('user_id', 1)
             ->where('id', $order->id)
-            // ->where('id', 1)
             ->first();
         // dd($orderDetail);
         return view('app.user.order', compact('orderDetail'));
