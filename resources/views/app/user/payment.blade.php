@@ -158,7 +158,7 @@
         </div>
     </div>
     <div class="overlay"></div>
-    <div class="form-voucher border border-dark rounded bg-dark text-white form_voucher_css form_voucher">
+    <div class="form-voucher border border-dark rounded text-white form_voucher_css form_voucher bg-dark">
         <span class="w-100 d-flex justify-content-end pt-4 pe-3 text-decoration-none btn_close_form_css close_form_voucher">
             <i class="fa-solid fa-close fa-2xl text-white"></i>
         </span>
@@ -174,7 +174,11 @@
                         <span class="badge border border-white">Code: {{$itemVoucher->code}}</span>
                         <div class="d-flex flex-row">Đơn tối thiểu: <p class="mb-0 ms-1 currency">{{$itemVoucher->minimum_order_value}}</p>
                         </div>
-                        <span class="badge mb-0 p-0">HSD: {{$itemVoucher->end_date}}</>
+                        <div class="d-flex flex-column align-items-start lh-lg">
+                            <span class="badge mb-1 p-0">HSD: {{$itemVoucher->end_date}}</span>
+                            <span class="badge mb-0 p-0 text-danger">Hết hạn sau {{$itemVoucher->days_remaining}} ngày</span>
+                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="w-25">
@@ -200,7 +204,11 @@
                         <span class="badge border border-white">Code: {{$itemVoucher->code}}</span>
                         <div class="d-flex flex-row">Đơn tối thiểu: <p class="mb-0 ms-1 currency">{{$itemVoucher->minimum_order_value}}</p>
                         </div>
-                        <span class="badge mb-0 p-0">HSD: {{$itemVoucher->end_date}}</span>
+                        <div class="d-flex flex-column align-items-start lh-lg">
+                            <span class="badge mb-1 p-0">HSD: {{$itemVoucher->end_date}}</span>
+                            <span class="badge mb-0 p-0 text-danger">Hết hạn sau {{$itemVoucher->days_remaining}} ngày</span>
+                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="w-25">

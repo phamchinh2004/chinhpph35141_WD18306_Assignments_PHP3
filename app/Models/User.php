@@ -15,8 +15,9 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
-    const TYPE_ADMIN = "admin";
-    const TYPE_MEMBER = "member";
+    const ROLE_ADMIN = "admin";
+    const ROLE_MEMBER = "member";
+    const ROLE_STAFF = "staff";
 
 
     /**
@@ -56,16 +57,18 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
     public function isAdmin()
     {
-        return $this->type == self::TYPE_ADMIN;
+        return $this->role == self::ROLE_ADMIN;
     }
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmail($this->email, $this->fullname, 'Cảm ơn bạn đã đăng ký tài khoản!'));
     }
-    public function informations(){
+    public function informations()
+    {
         return $this->hasMany(Information::class);
     }
-    public function carts(){
+    public function carts()
+    {
         return $this->hasMany(Cart::class);
     }
 }

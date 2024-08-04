@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code');
             $table->integer('amount');
+            $table->integer('quantity');
             $table->enum('type', ['fixed', 'percent', 'free_ship']);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

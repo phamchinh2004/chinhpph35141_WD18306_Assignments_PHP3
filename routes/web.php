@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\VerifyEmailContrller;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\CheckAdminMiddleware;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //---------------------PAYMENT---------------------
     Route::get('payment/{items}', [UserController::class, 'payment'])->name('payment');
 
-    Route::get('order', [UserController::class, 'order'])->name('order');
+    Route::post('order', [UserController::class, 'order'])->name('order');
+
+    Route::get('orderDetail/{order_id}', [UserController::class, 'orderDetail'])->name('orderDetail');
 
     //-------------------------------ADMIN----------------------------------
     Route::middleware(['isAdmin'])->group(function () {
@@ -69,17 +72,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('app.admin.home');
         })->name('adminHome');
 
-        // Route::get('admin',function(){
-        //     return 'ADMIN';
-        // })->middleware(CheckAdminMiddleware::class);
-
-        // Route::get('admin',function(){
-        //     return 'ADMIN';
-        // })->middleware('isAdmin');
-
-        Route::get('productsManager', function () {
-            return view('app.admin.products.index');
-        })->name('adminProductsMagager');
+        Route::get('productsManager', [ProductController::class, 'index'])->name('productsManagerIndex');
+        Route::get('productsManager/create', [ProductController::class, 'create'])->name('createProduct');
+        Route::post('productsManager/create/temporary', [ProductController::class, 'createTemporary'])->name('createProductTemporary');
+        Route::delete('productsManager/{id}', [ProductController::class, 'destroy'])->name('deleteProduct');
 
         Route::get('categoriesManager', function () {
             return view('app.admin.products.index');

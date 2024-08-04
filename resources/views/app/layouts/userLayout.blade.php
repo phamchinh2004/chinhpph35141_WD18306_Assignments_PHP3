@@ -236,8 +236,8 @@
     <script src="{{mix('resources/js/xzoom.js')}}"></script>
     <!-- <script src="{{mix('resources/js/user.js')}}"></script> -->
     <script>
-        //-----------------------------------------------------------Notification function-----------------------------------------------------------
         $(document).ready(function(e) {
+            //-----------------------------------------------------------Notification function-----------------------------------------------------------
             function notifications(type, data, title) {
                 $(function() {
                     Command: toastr[type](data, title);
@@ -842,9 +842,9 @@
                     notifications('warning', 'Vui lòng chọn sản phẩm cần xóa!', 'Chưa chọn sản phẩm!');
                 }
             })
-            $('#payment').click(function() {
+            $('#paymentCart').click(function() {
                 if (total_item_cart.length > 0) {
-                    const url = "{{route('payment',['items'=>':total_item_cart'])}}"
+                    const url = "{{route('payment',['items'=>':total_item_cart','from'=>'cart'])}}"
                         .replace(':total_item_cart', total_item_cart)
                     window.location.href = url;
                 } else {
@@ -855,8 +855,8 @@
             var voucher_click = false;
             var freeship_voucher_click = false;
 
-            var voucher_id_focused = null;
-            var freeship_voucher_id_focused = null;
+            var voucher_id_focused = 0;
+            var freeship_voucher_id_focused = 0;
 
             var amount_reduce_voucher = 0;
             var amount_reduce_freeship_voucher = 0;
@@ -866,7 +866,7 @@
             var value_voucher_base = $('.value_voucher_base').text(); //Phần hiển thị tên mã giảm giá
             var value_shipping_voucher_base = $('.value_shipping_voucher_base').text();
             console.log(value_shipping_voucher_base);
-            
+
 
             var reduce_voucher_costs = $('.reduce_voucher_costs').text(); //Phần hiển thị giảm được bao nhiêu tiền/%
             var reduce_shipping_costs = $('.reduce_shipping_costs').text();
@@ -1035,7 +1035,7 @@
                     $('.reduce_shipping_costs').text('(-' + detail_reduce_shipping_costs + ')');
                 }
                 voucher_click = false;
-                voucher_id_focused = null;
+                voucher_id_focused = 0;
                 amount_reduce_voucher = 0;
 
                 $('.detail_reduce_voucher_costs').text(null);
@@ -1140,7 +1140,7 @@
                     $('.detail_reduce_voucher_costs').text('(-' + detail_reduce_voucher_costs + ')').show();
                 }
                 freeship_voucher_click = false;
-                freeship_voucher_id_focused = null;
+                freeship_voucher_id_focused = 0;
                 amount_reduce_freeship_voucher = 0;
 
                 $('.form_freeship_voucher').hide();
@@ -1148,7 +1148,41 @@
             });
 
             $('.payment_click').click(function() {
-                location.reload();
+                var value_total_payment = $('.total_payment').text();
+                value_total_payment = parseFloat(value_total_payment.replace(/[^0-9]/g, ''));
+                total_payment_base = parseFloat(total_payment_base.replace(/[^0-9]/g, ''));
+                console.log('total_payment_base:' + total_payment_base);
+                console.log('value_total_payment:' + value_total_payment);
+                console.log('freeship_voucher_id_focused:' + freeship_voucher_id_focused);
+                console.log('voucher_id_focused:' + voucher_id_focused);
+                console.log('amount_reduce_freeship_voucher:' + amount_reduce_freeship_voucher);
+                console.log('amount_reduce_voucher:' + amount_reduce_voucher);
+
+                $.ajax({
+                    url: "{{route('order')}}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        total_payment_base: total_payment_base,
+                        total_payment: value_total_payment,
+                        freeship_id: freeship_voucher_id_focused,
+                        voucher_id: voucher_id_focused,
+                        shipping_voucher: amount_reduce_freeship_voucher,
+                        voucher: amount_reduce_voucher
+                    },
+                    success: function(response) {
+                        if (response.status == "success") {
+                            console.log(response.data);
+                            var url = "{{route('orderDetail',['order_id'=>':response.data'])}}".replace(':response.data', response.data)
+                            window.location.href = url;
+                        } else {
+                            console.log(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                })
             })
         })
     </script>

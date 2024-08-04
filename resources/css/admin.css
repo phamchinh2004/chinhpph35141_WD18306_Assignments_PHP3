@@ -398,3 +398,12 @@ label[for=nav-footer-toggle] {
   margin-left: 285px;
   margin-right: 16px;
 }
+
+.scroll-x {
+  overflow-x: auto;
+  scrollbar-color: transparent transparent;
+}
+
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}

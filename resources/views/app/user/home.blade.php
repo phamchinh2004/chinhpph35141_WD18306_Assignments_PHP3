@@ -46,11 +46,11 @@
                 <!-- Items -->
                 @foreach ($categories as $category)
 
-                <div class="col-3">
+                <div class="col-3 d-flex flex-column">
                     <a href="">
                         <img class="w-100 fix-height" src="{{$category->image}}" alt="">
                     </a>
-                    <a class="btn btn-white btn-outline-dark w-100 rounded-bottom pt-3 pb-3 mt-3 fs-5 fw-bold" href="">{{$category->name}}</a>
+                    <a class="btn btn-white btn-outline-dark w-100 rounded-bottom pt-3 pb-3 mt-3 fs-5 fw-bold" >{{$category->name}}</a>
                 </div>
 
                 @endforeach
@@ -87,10 +87,8 @@
                         <div class="fs-5 fw-bold d-flex flex-row">
                             <p class=" currency">{{$product->sale_price}}</p>
                         </div>
-                        <p>Đã bán: {{$product->total_quantity}}</p>
-                    </div>
-                    <div>
-                        <a class="btn btn-white btn-outline-dark w-100 pt-2 pb-2">Thêm vào giỏ hàng</a>
+                        <p class="m-0">Đã bán: {{$product->total_quantity_sold}}</p>
+                        <p>Lượt xem: {{$product->view}}</p>
                     </div>
                 </div>
 

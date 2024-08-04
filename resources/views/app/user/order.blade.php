@@ -7,7 +7,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userHome.index')}}">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('cart')}}">Giỏ hàng</a></li>
-                <li class="breadcrumb-item"><a class="text-dark text-decoration-none fw-bold" href="{{route('userPayment')}}">Thanh toán</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Thanh toán</li>
                 <li class="breadcrumb-item active" aria-current="page">Thông tin đơn hàng</li>
             </ol>
         </nav>
@@ -20,9 +20,9 @@
                         <p class="m-0 mt-4 fs-5 text-danger">Địa chỉ nhận hàng</p>
                     </div>
                     <div class="d-flex flex-row align-items-center mt-3">
-                        <h5 class="m-0 me-2">Phạm Chình</h5>
-                        <h5 class="m-0 me-3">(+84) 987654321</h5>
-                        <p class="m-0 me-3">Số 24, Ngõ 199 Cầu Diễn, Phường Phúc Diễn, Quận Bắc Từ Liêm, Hà Nội
+                        <h5 class="m-0 me-2">{{$orderDetailData['full_name']}}</h5>
+                        <h5 class="m-0 me-3">(+84) {{$orderDetailData['phone_number']}}</h5>
+                        <p class="m-0 me-3">{{$orderDetailData['address']}}
                         </p>
                     </div>
                 </div>
@@ -44,26 +44,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($orderDetail->orderDetails as $products)
+                            @foreach ($orderDetailData['product_variants'] as $itemVariant)
                             <tr>
                                 <td class="">
                                     <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{$products->product->image}}" alt="" width="110">
+                                        <img class="me-3" src="{{$itemVariant['image']}}" alt="" width="110">
                                         <h6 class="form-check-label">
-                                            {{$products->product->name}}
+                                            {{$itemVariant['name']}}
                                         </h6>
                                     </div>
                                 </td>
                                 <td class="centered">
                                     <div class="d-flex text-center flex-column h-auto">
                                         <span>Phân loại hàng:</span>
-                                        <span class="fw-bold">{{$products->value_variants}}</span>
+                                        <span class="fw-bold">{{$itemVariant['attribute_values']}}</span>
                                     </div>
                                 </td>
-                                <td class="centered text-center">{{$products->price}}đ</td>
-                                <td class="centered text-center">{{$products->quantity}}</td>
+                                <td class="centered text-center currency">{{$itemVariant['price']}}</td>
+                                <td class="centered text-center">{{$itemVariant['quantity']}}</td>
 
-                                <td class="centered text-center text-danger">{{$products->total_price}}đ</td>
+                                <td class="centered text-center text-danger currency">{{$itemVariant['total_price']}}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -82,27 +82,37 @@
                             <tbody>
                                 <tr>
                                     <td>Tổng tiền hàng</td>
-                                    <th>₫{{$orderDetail->total_cost}}</th>
+                                    <th class="currency">{{$orderDetailData['total_cost']}}</th>
                                 </tr>
                                 <tr>
                                     <td>Phí vận chuyển
                                     </td>
-                                    <th>₫{{$orderDetail->shipping_price}}</th>
+                                    <th class="currency">{{$orderDetailData['shipping_price']}}</th>
                                 </tr>
                                 <tr>
                                     <td>Giảm phí vận chuyển
                                     </td>
-                                    <th>-₫{{$orderDetail->shipping_voucher}}</th>
+                                    <th class="currency">{{$orderDetailData['shipping_voucher']}}</th>
                                 </tr>
                                 <tr>
                                     <td>Voucher từ eSportsJacket
                                     </td>
-                                    <th>-₫{{$orderDetail->voucher}}</th>
+                                    <th class="currency">{{$orderDetailData['voucher']}}</th>
                                 </tr>
                                 <tr>
                                     <td class="centered">Thành tiền
                                     </td>
-                                    <th class="fs-4 text-danger fw-bold">₫{{$orderDetail->total_payment}}</th>
+                                    <th class="fs-4 text-danger fw-bold currency">{{$orderDetailData['total_payment']}}</th>
+                                </tr>
+                                <tr>
+                                    <td class="centered">Ngày đặt hàng
+                                    </td>
+                                    <td>{{$orderDetailData['created_at']}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="centered">Trạng thái
+                                    </td>
+                                    <td class="text-success">{{$orderDetailData['status']==1?'Chờ xác nhận!':'Không xác định!'}}</td>
                                 </tr>
                             </tbody>
                         </table>

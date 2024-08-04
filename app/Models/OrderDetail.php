@@ -14,7 +14,7 @@ class OrderDetail extends Model
         "quantity",
         "total_price",
         "order_id",
-        "product_id",
+        "product_variant_id",
         "created_at",
         "updated_at",
     ];
@@ -22,8 +22,8 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(Order::class);
     }
-    public function product()
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
     }
 }

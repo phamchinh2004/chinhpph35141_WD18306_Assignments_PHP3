@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Account;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('shipping_voucher')->default(0);
             $table->integer('voucher')->default(0);
             $table->integer('total_payment');
-            $table->foreignIdFor(Account::class)->constrained();
+            $table->foreignIdFor(User::class)->constrained();
             $table->timestamps();
         });
     }

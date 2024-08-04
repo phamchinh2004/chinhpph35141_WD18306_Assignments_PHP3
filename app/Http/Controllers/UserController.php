@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendEmailOrderSuccess;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\Cart;
@@ -19,6 +20,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -39,34 +41,16 @@ class UserController extends Controller
         //Get all categories
         $categories = Category::all();
         //Get all products
-        $products = Product::leftJoin('order_details', 'order_details.product_id', '=', 'products.id')
-            ->select('products.*', DB::raw('SUM(order_details.quantity) as total_quantity'))
-            ->groupBy('products.id')
-            ->orderBy('total_quantity', 'desc')
+        $products = Product::leftJoin('product_variants as pv', 'products.id', '=', 'pv.product_id')
+            ->leftJoin('order_details as od', 'pv.id', '=', 'od.product_variant_id')
+            ->leftJoin('orders as o', 'od.order_id', '=', 'o.id') // Join với bảng orders
+            ->select('products.*', DB::raw('COALESCE(SUM(CASE WHEN o.status = 2 THEN od.quantity ELSE 0 END), 0) AS total_quantity_sold'))
+            ->groupBy('products.id', 'products.name', 'products.description', 'products.sale_price', 'products.purchase_price')
+            ->orderBy('total_quantity_sold', 'desc')
             ->get();
-        foreach ($products as $product) {
-            if (!$product->total_quantity) {
-                $product->total_quantity = 0;
-            }
-        }
         return view('app.user.home', compact('categories', 'products', 'user'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
     /**
      * Display the specified resource.
@@ -75,6 +59,8 @@ class UserController extends Controller
     {
         //Get all variant products
         $product = Product::with('productVariants.productAttributeValueDetail.attributeValue')->find($id);
+        $product->view = $product->view + 1;
+        $product->save();
         $array_variants = [];
         if ($product) {
             foreach ($product->productVariants as $productVariant) {
@@ -225,12 +211,15 @@ class UserController extends Controller
             $checkCart->updated_at->now();
             $checkCart->save();
         } else {
-            Cart::create([
-                'quantity' => $quantity,
-                'product_variant_id' => $variant_id,
-                'user_id' => Auth::user()->id,
-                'created_at' => now()
-            ]);
+            $variant = ProductVariant::select('stock')->where('id', $variant_id)->first();
+            if ($variant) {
+                Cart::create([
+                    'quantity' => $quantity <= $variant->stock ? $quantity : $variant->stock,
+                    'product_variant_id' => $variant_id,
+                    'user_id' => Auth::user()->id,
+                    'created_at' => now()
+                ]);
+            }
         }
         return redirect()->route('cart');
     }
@@ -354,6 +343,7 @@ class UserController extends Controller
                             $array_item_attribute_values[] = $itemAttributeValue->value;
                         }
                     }
+                    $array_item['variant_id'] = $itemInfo->product_variant_id;
                     $array_item['attribute_values'] = $array_item_attribute_values;
                     $array_item['purchase_price'] = $itemInfo->productVariant->purchase_price;
                     $array_item['sale_price'] = $itemInfo->productVariant->sale_price;
@@ -368,9 +358,12 @@ class UserController extends Controller
                     $array_payments[] = $array_item;
                     $transport_fee = 30000;
                     $total_payment_end = $total_payment + $transport_fee;
-                    $listVoucher = Voucher::where('type', '!=', 'free_ship')->where('is_active', 1)->get();
-                    $listFreeshipVoucher = Voucher::where('type', 'free_ship')->where('is_active', 1)->get();
+                    $listVoucher = Voucher::select('vouchers.*', DB::raw('DATEDIFF(end_date, NOW()) as days_remaining'))
+                        ->where('type', '!=', 'free_ship')->where('quantity', '>', 0)->where('is_active', 1)->where('end_date', '>', now())->get();
+                    $listFreeshipVoucher = Voucher::select('vouchers.*', DB::raw('DATEDIFF(end_date, NOW()) as days_remaining'))
+                        ->where('type', 'free_ship')->where('quantity', '>', 0)->where('is_active', 1)->where('end_date', '>', now())->get();
                     $_SESSION['payment'] = $array_payments;
+                    session(['payment' => $array_payments]);
                 } else {
                     return redirect()->route('cart');
                 }
@@ -380,69 +373,178 @@ class UserController extends Controller
         } else {
             return redirect()->route('cart');
         }
-        // dd($_SESSION['payment']);
+        // dd(session('payment'));
         return view('app.user.payment', compact('array_payments', 'total_payment', 'user_info', 'total_payment_end', 'transport_fee', 'listVoucher', 'listFreeshipVoucher'));
     }
-    public function order()
+    public function order(Request $request)
     {
-        $productsPayment = Cart::with('product')->get();
-        $total_cost = 0;
-        $shipping = 30000;
-        foreach ($productsPayment as $product) {
-            $total_cost += $product->product->sale_price;
+        if ($request->all()) {
+            if (session()->has('payment')) {
+                $total_payment_base = $request->input('total_payment_base');
+                $total_payment = $request->input('total_payment');
+                $shipping_voucher = $request->input('shipping_voucher');
+                $voucher = $request->input('voucher');
+                $freeship_id = $request->input('freeship_id');
+                $voucher_id = $request->input('voucher_id');
+                $insertOrder = Order::create([
+                    'total_cost' => $total_payment_base,
+                    'shipping_price' => 30000,
+                    'shipping_voucher' => $shipping_voucher,
+                    'voucher' => $voucher,
+                    'total_payment' => $total_payment,
+                    'user_id' => Auth::user()->id
+                ]);
+                $newOrderId = null;
+                if ($insertOrder) {
+                    $newOrderId = $insertOrder->id;
+                    foreach (session('payment') as $item) {
+                        $attributeValues = implode(' ', $item['attribute_values']);
+                        $insertOrderDetail = OrderDetail::create([
+                            'value_variants' => $attributeValues,
+                            'price' => $item['sale_price'] ? $item['sale_price'] : $item['purchase_price'],
+                            'quantity' => $item['quantity'],
+                            'total_price' => $item['total_price'],
+                            'order_id' => $insertOrder->id,
+                            'product_variant_id' => $item['variant_id']
+                        ]);
+                        if (!$insertOrderDetail) {
+                            $response = [
+                                'status' => 'error',
+                                'message' => 'Đã xảy ra lỗi khi thêm dữ liệu vào bảng orderDetail!',
+                            ];
+                            return response()->json($response);
+                        }
+                        Cart::where('product_variant_id', $item['variant_id'])->delete();
+                    }
+                    if ($freeship_id != 0 && $voucher_id != 0) {
+                        $quantityFreeshipVoucher = Voucher::select('quantity')->where('id', $freeship_id)->first();
+                        $quantityFreeshipVoucher->quantity = $quantityFreeshipVoucher->quantity - 1;
+                        $quantityFreeshipVoucher->save();
+                        $quantityVoucher = Voucher::select('quantity')->where('id', $voucher_id)->first();
+                        $quantityVoucher->quantity = $quantityVoucher->quantity - 1;
+                        $quantityVoucher->save();
+                    } else if ($freeship_id != 0) {
+                        $quantityFreeshipVoucher = Voucher::select('quantity')->where('id', $freeship_id)->first();
+                        $quantityFreeshipVoucher->quantity = $quantityFreeshipVoucher->quantity - 1;
+                        $quantityFreeshipVoucher->save();
+                    } else if ($voucher_id != 0) {
+                        $quantityVoucher = Voucher::select('quantity')->where('id', $voucher_id)->first();
+                        $quantityVoucher->quantity = $quantityVoucher->quantity - 1;
+                        $quantityVoucher->save();
+                    }
+                    $orderDetailData = [];
+                    $orderDetailData['total_cost'] = $insertOrder->total_cost;
+                    $orderDetailData['shipping_price'] = $insertOrder->shipping_price;
+                    $orderDetailData['shipping_voucher'] = $insertOrder->shipping_voucher;
+                    $orderDetailData['voucher'] = $insertOrder->voucher;
+                    $orderDetailData['total_payment'] = $insertOrder->total_payment;
+                    $orderDetailData['status'] = $insertOrder->status;
+                    $orderDetailData['created_at'] = $insertOrder->created_at;
+                    $orderDetail = OrderDetail::where('order_id', $insertOrder->id)->get();
+                    $informationUser = Information::leftJoin('users as u', 'informations.user_id', '=', 'u.id')
+                        ->leftJoin('orders as o', 'u.id', '=', 'o.user_id')
+                        ->where('u.id', Auth::user()->id)
+                        ->where('o.id', $insertOrder->id)
+                        ->where('informations.is_active', '=', 1)
+                        ->first();
+                    if ($informationUser) {
+                        $orderDetailData['full_name'] = $informationUser->full_name;
+                        $orderDetailData['address'] = $informationUser->address;
+                        $orderDetailData['phone_number'] = $informationUser->phone_number;
+                    }
+                    if ($orderDetail) {
+                        $array_product_detail = [];
+                        foreach ($orderDetail as $item) {
+                            $productVariant = Product::leftJoin('product_variants as pv', 'products.id', '=', 'pv.product_id')
+                                ->where('pv.id', $item->product_variant_id)->first();
+                            if ($productVariant) {
+                                $array_product_detail['image'] = $productVariant->image;
+                                $array_product_detail['name'] = $productVariant->name;
+                            }
+                            $array_product_detail['attribute_values'] = $item->value_variants;
+                            $array_product_detail['price'] = $item->price;
+                            $array_product_detail['quantity'] = $item->quantity;
+                            $array_product_detail['total_price'] = $item->total_price;
+                            $orderDetailData['product_variants'][] = $array_product_detail;
+                        }
+                    } else {
+                        return redirect()->route('userHome.index');
+                    }
+                    $full_name = Auth::user()->informations->first()->full_name;
+                    Mail::to(Auth::user()->email)->send(new SendEmailOrderSuccess($full_name, $orderDetailData));
+                } else {
+                    $response = [
+                        'status' => 'error',
+                        'message' => 'Đã xảy ra lỗi khi thêm dữ liệu vào bảng order!',
+                    ];
+                    return response()->json($response);
+                }
+                $response = [
+                    'status' => 'success',
+                    'message' => 'Lấy dữ liệu thành công!',
+                    'data' => $newOrderId
+                ];
+            } else {
+                $response = [
+                    'status' => 'error',
+                    'message' => 'Không tìm thấy thông tin sản phẩm cần thêm!',
+                ];
+                return response()->json($response);
+            }
+        } else {
+            return view('app.user.order');
         }
-        $total_payment = $total_cost + $shipping;
-        $order = Order::create([
-            'total_cost' => $total_cost,
-            'shipping_price' => $shipping,
-            'shipping_voucher' => 0,
-            'voucher' => 0,
-            'total_payment' => $total_payment,
-            'user_id' => 1,
-            'created_at' => now()
-        ]);
-        foreach ($productsPayment as $product) {
-            OrderDetail::create([
-                'value_variants' => 'Faker,M',
-                'price' => $product->product->sale_price,
-                'quantity' => $product->quantity,
-                'total_price' => $product->product->sale_price * $product->quantity,
-                'order_id' => $order->id,
-                'product_id' => $product->product->id,
-                'created_at' => now()
-            ]);
+        return response()->json($response);
+    }
+    public function orderDetail(String $order_id)
+    {
+        $orderDetailData = [];
+        $order = Order::where('id', $order_id)->where('user_id', Auth::user()->id)->first();
+        if ($order) {
+            $orderDetailData['total_cost'] = $order->total_cost;
+            $orderDetailData['shipping_price'] = $order->shipping_price;
+            $orderDetailData['shipping_voucher'] = $order->shipping_voucher;
+            $orderDetailData['voucher'] = $order->voucher;
+            $orderDetailData['total_payment'] = $order->total_payment;
+            $orderDetailData['status'] = $order->status;
+            $orderDetailData['created_at'] = $order->created_at;
+            $orderDetail = OrderDetail::where('order_id', $order_id)->get();
+            $informationUser = Information::leftJoin('users as u', 'informations.user_id', '=', 'u.id')
+                ->leftJoin('orders as o', 'u.id', '=', 'o.user_id')
+                ->where('u.id', Auth::user()->id)
+                ->where('o.id', $order_id)
+                ->where('informations.is_active', '=', 1)
+                ->first();
+            if ($informationUser) {
+                $orderDetailData['full_name'] = $informationUser->full_name;
+                $orderDetailData['address'] = $informationUser->address;
+                $orderDetailData['phone_number'] = $informationUser->phone_number;
+            }
+            if ($orderDetail) {
+                $array_product_detail = [];
+                foreach ($orderDetail as $item) {
+                    $productVariant = Product::leftJoin('product_variants as pv', 'products.id', '=', 'pv.product_id')
+                        ->where('pv.id', $item->product_variant_id)->first();
+                    if ($productVariant) {
+                        $array_product_detail['image'] = $productVariant->image;
+                        $array_product_detail['name'] = $productVariant->name;
+                    }
+                    $array_product_detail['attribute_values'] = $item->value_variants;
+                    $array_product_detail['price'] = $item->price;
+                    $array_product_detail['quantity'] = $item->quantity;
+                    $array_product_detail['total_price'] = $item->total_price;
+                    $orderDetailData['product_variants'][] = $array_product_detail;
+                }
+            } else {
+                return redirect()->route('userHome.index');
+            }
+        } else {
+            return redirect()->route('userHome.index');
         }
-        foreach ($productsPayment as $product) {
-            Cart::where('user_id', 1)->delete();
-        }
-        $orderDetail = Order::with('orderDetails.product')
-            ->where('user_id', 1)
-            ->where('id', $order->id)
-            ->first();
-        // dd($orderDetail);
-        return view('app.user.order', compact('orderDetail'));
+        // dd($orderDetailData);
+        return view('app.user.order', compact('orderDetailData'));
     }
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Product $product)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
-    {
-        //
-    }
 }

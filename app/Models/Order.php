@@ -14,7 +14,7 @@ class Order extends Model
         "shipping_voucher",
         "voucher",
         "total_payment",
-        "account_id",
+        "user_id",
         "created_at",
         "updated_at"
     ];
@@ -22,8 +22,8 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
-    public function account()
+    public function user()
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(User::class);
     }
 }

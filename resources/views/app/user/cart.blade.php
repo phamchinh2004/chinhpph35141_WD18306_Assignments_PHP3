@@ -118,7 +118,7 @@
                                         </div>
                                     </th>
                                     <th>
-                                        <span class="btn btn-dark border-white btn-outline-light pt-3 pb-3 ps-5 pe-5 fw-bold" id="payment">Mua hàng</>
+                                        <span class="btn btn-dark border-white btn-outline-light pt-3 pb-3 ps-5 pe-5 fw-bold" id="paymentCart">Mua hàng</>
                                     </th>
                                 </tr>
                             </tfoot>
