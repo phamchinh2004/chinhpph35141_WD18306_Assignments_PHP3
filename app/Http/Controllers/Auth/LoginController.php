@@ -34,7 +34,7 @@ class LoginController extends Controller
                 Mail::to($email)->send(new VerifyEmail($token, $fullname, $user_id));
                 return redirect()->route('notificationEmail');
             }
-            if (Auth::user()->isAdmin()) {
+            if (Auth::user()->isAdmin() || Auth::user()->isStaff()) {
                 return redirect()->route('adminHome');
             }
             return redirect()->route('userHome.index');

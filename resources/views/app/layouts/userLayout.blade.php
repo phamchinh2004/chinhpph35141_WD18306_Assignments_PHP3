@@ -237,6 +237,16 @@
     <!-- <script src="{{mix('resources/js/user.js')}}"></script> -->
     <script>
         $(document).ready(function(e) {
+            @if(session('statusSuccess'))
+            var message = @json(session('statusSuccess'));
+            notifications('success', message, 'Successfully');
+            @elseif(session('statusError'))
+            var message = @json(session('statusError'));
+            notifications('error', message, 'Error');
+            @elseif(session('statusWarning'))
+            var message = @json(session('statusWarning'));
+            notifications('warning', message, 'warning');
+            @endif
             //-----------------------------------------------------------Notification function-----------------------------------------------------------
             function notifications(type, data, title) {
                 $(function() {

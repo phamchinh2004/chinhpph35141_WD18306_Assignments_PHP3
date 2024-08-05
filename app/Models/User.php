@@ -59,6 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role == self::ROLE_ADMIN;
     }
+    public function isStaff()
+    {
+        return $this->role == self::ROLE_STAFF;
+    }
     public function sendEmailVerificationNotification()
     {
         $this->notify(new VerifyEmail($this->email, $this->fullname, 'Cảm ơn bạn đã đăng ký tài khoản!'));

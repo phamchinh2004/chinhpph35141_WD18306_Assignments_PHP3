@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckAdminMiddleware
+class CheckAdminOrStaffMiddleWare
 {
     /**
      * Handle an incoming request.
@@ -16,10 +16,10 @@ class CheckAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->isAdmin()) {
+        if (Auth::check() && Auth::user()->isAdmin() || Auth::user()->isStaff()) {
             return $next($request);
         } else {
-            return back()->with('statusWarning', 'Bạn không có đủ quyền hạn!');
+            return back()->with('statusWarning', 'Bạn không có đủ quyền hạn để làm điều này!');
         }
     }
 }

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Mail\SendEmailOrderSuccess;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\Banner;
+use App\Models\BannerImage;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\Information;
@@ -39,7 +41,7 @@ class UserController extends Controller
                 ->first();
         }
         //Get all categories
-        $categories = Category::all();
+        $categories = Category::paginate(4, ['*'], 'categories_page');
         //Get all products
         $products = Product::leftJoin('product_variants as pv', 'products.id', '=', 'pv.product_id')
             ->leftJoin('order_details as od', 'pv.id', '=', 'od.product_variant_id')
@@ -47,8 +49,14 @@ class UserController extends Controller
             ->select('products.*', DB::raw('COALESCE(SUM(CASE WHEN o.status = 2 THEN od.quantity ELSE 0 END), 0) AS total_quantity_sold'))
             ->groupBy('products.id', 'products.name', 'products.description', 'products.sale_price', 'products.purchase_price')
             ->orderBy('total_quantity_sold', 'desc')
-            ->get();
-        return view('app.user.home', compact('categories', 'products', 'user'));
+            ->paginate(12, ['*'], 'products_page');
+        //Get banner active
+        $banner = Banner::where('is_active', 1)->first();
+        $banner_images = null;
+        if ($banner) {
+            $banner_images = BannerImage::where('banner_id', $banner->id)->get();
+        }
+        return view('app.user.home', compact('categories', 'products', 'user', 'banner_images'));
     }
 
 
@@ -359,10 +367,10 @@ class UserController extends Controller
                     $transport_fee = 30000;
                     $total_payment_end = $total_payment + $transport_fee;
                     $listVoucher = Voucher::select('vouchers.*', DB::raw('DATEDIFF(end_date, NOW()) as days_remaining'))
-                        ->where('type', '!=', 'free_ship')->where('quantity', '>', 0)->where('is_active', 1)->where('end_date', '>', now())->get();
+                        ->where('type', '!=', 'free_ship')->where('quantity', '>', 0)->where('is_active', 1)->where('end_date', '>', now())->where('start_date', '<=', now())->get();
                     $listFreeshipVoucher = Voucher::select('vouchers.*', DB::raw('DATEDIFF(end_date, NOW()) as days_remaining'))
                         ->where('type', 'free_ship')->where('quantity', '>', 0)->where('is_active', 1)->where('end_date', '>', now())->get();
-                    $_SESSION['payment'] = $array_payments;
+                    // $_SESSION['payment'] = $array_payments;
                     session(['payment' => $array_payments]);
                 } else {
                     return redirect()->route('cart');

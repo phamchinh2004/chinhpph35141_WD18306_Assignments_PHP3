@@ -4,8 +4,11 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Auth\VerifyEmailContrller;
+use App\Http\Controllers\BannerController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VoucherController;
 use App\Http\Middleware\CheckAdminMiddleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -67,30 +70,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('orderDetail/{order_id}', [UserController::class, 'orderDetail'])->name('orderDetail');
 
     //-------------------------------ADMIN----------------------------------
-    Route::middleware(['isAdmin'])->group(function () {
+    Route::middleware(['isAdminOrStaff'])->group(function () {
         Route::get('adminHome', function () {
             return view('app.admin.home');
         })->name('adminHome');
 
         Route::get('productsManager', [ProductController::class, 'index'])->name('productsManagerIndex');
-        Route::get('productsManager/create', [ProductController::class, 'create'])->name('createProduct');
-        Route::post('productsManager/create/temporary', [ProductController::class, 'createTemporary'])->name('createProductTemporary');
-        Route::delete('productsManager/{id}', [ProductController::class, 'destroy'])->name('deleteProduct');
+        Route::get('productsManager/create', [ProductController::class, 'create'])->name('createProduct')->middleware('isAdmin');
+        Route::post('productsManager', [ProductController::class, 'createTemporary'])->name('createProductTemporary')->middleware('isAdmin');
+        Route::get('productsManager/edit/{id}', [ProductController::class, 'edit'])->name('editProduct')->middleware('isAdmin');
+        Route::patch('productsManager/edit/{id}', [ProductController::class, 'update'])->name('updateProduct')->middleware('isAdmin');
+        Route::delete('productsManager/{id}', [ProductController::class, 'destroy'])->name('deleteProduct')->middleware('isAdmin');
 
-        Route::get('categoriesManager', function () {
-            return view('app.admin.products.index');
-        })->name('adminCategoriesMagager');
+        Route::get('bannersManager', [BannerController::class, 'index'])->name('bannersManagerIndex');
+        Route::get('bannersManager/create', [BannerController::class, 'create'])->name('createBanner')->middleware('isAdmin');
+        Route::post('bannersManager', [BannerController::class, 'store'])->name('storeBanner')->middleware('isAdmin');
+        Route::get('bannersManager/edit/{id}', [BannerController::class, 'edit'])->name('editBanner')->middleware('isAdmin');
+        Route::delete('bannersManager/deleteBanner/{id}', [BannerController::class, 'destroy'])->name('deleteBanner')->middleware('isAdmin');
+        Route::patch('bannersManager/updateStatus/{id}', [BannerController::class, 'updateStatus'])->name('updateStatusBanner')->middleware('isAdmin');
 
-        Route::get('vouchersManager', function () {
-            return view('app.admin.products.index');
-        })->name('adminVouchersMagager');
+        Route::get('vouchersManager', [VoucherController::class, 'index'])->name('vouchersManagerIndex');
+        Route::get('vouchersManager/create', [VoucherController::class, 'create'])->name('createVoucher')->middleware('isAdmin');
+        Route::post('vouchersManager', [VoucherController::class, 'store'])->name('storeVoucher')->middleware('isAdmin');
+        Route::get('vouchersManager/edit/{id}', [VoucherController::class, 'edit'])->name('editVoucher')->middleware('isAdmin');
+        Route::patch('vouchersManager/update/{id}', [VoucherController::class, 'update'])->name('updateVoucher')->middleware('isAdmin');
+        Route::delete('vouchersManager/deleteVoucher/{id}', [VoucherController::class, 'destroy'])->name('deleteVoucher')->middleware('isAdmin');
+        Route::patch('vouchersManager/updateStatus/{id}', [VoucherController::class, 'updateStatus'])->name('updateStatusVoucher')->middleware('isAdmin');
 
-        Route::get('ordersManager', function () {
-            return view('app.admin.products.index');
-        })->name('adminOrdersMagager');
-
-        Route::get('bannersManager', function () {
-            return view('app.admin.products.index');
-        })->name('adminBannersMagager');
+        Route::get('ordersManager', [OrderController::class, 'index'])->name('ordersManagerIndex');
+        Route::get('ordersManager/edit/{id}', [OrderController::class, 'edit'])->name('editOrder')->middleware('isAdmin');
+        Route::patch('ordersManager/update/{id}', [OrderController::class, 'update'])->name('updateOrder')->middleware('isAdmin');
+        Route::patch('ordersManager/updateStatus/{id}', [OrderController::class, 'updateStatus'])->name('updateStatusOrder')->middleware('isAdmin');
     });
 });

@@ -407,3 +407,12 @@ label[for=nav-footer-toggle] {
 .scroll-x::-webkit-scrollbar {
   display: none;
 }
+label{
+  color: rgb(66, 255, 66);
+}
+.control-cell {
+  position: sticky;
+  right: 0;
+  background-color: #343a40; 
+  z-index: 1; 
+}

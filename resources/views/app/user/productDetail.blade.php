@@ -14,11 +14,11 @@
             <div class="d-flex flex-column w-50 justify-content-center border-dotted-end me-3">
                 @if ($productDetail->image)
                 <div class="d-flex justify-content-center align-items-center">
-                    <img class="w-75 main-image xzoom" src="{{$productDetail->image}}" alt="" xoriginal="{{$productDetail->image}}">
+                    <img class="w-75 main-image xzoom" src="{{asset('uploads/'.$productDetail->image)}}" alt="" xoriginal="{{asset('uploads/'.$productDetail->image)}}">
                 </div>
                 <div class="row d-flex justify-content-center align-items-center mt-3 mb-3 xzoom-thumbs">
                     <a class="col-2 p-0">
-                        <img class="w-75 sub_image_first xzoom-gallery" src="{{$productDetail->image}}" alt="">
+                        <img class="w-75 sub_image_first xzoom-gallery" src="{{asset('uploads/'.$productDetail->image)}}" alt="">
                     </a>
                     @foreach ($productImages as $productImage)
                     @if ( $productImage->image)

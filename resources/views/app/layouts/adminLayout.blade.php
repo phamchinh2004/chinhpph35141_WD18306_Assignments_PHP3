@@ -16,7 +16,7 @@
 
 <body>
     <!-- partial:index.partial.html -->
-    <div id="nav-bar">
+    <div id="nav-bar" class="position-fixed">
         <input id="nav-toggle" type="checkbox" />
         <div id="nav-header">
             <a id="nav-title" href="#">eSports-Jacket</a>
@@ -26,21 +26,21 @@
         <div id="nav-content">
             <div class="nav-button"><a class="w-100" href="{{route('adminHome')}}"><i class="fas fa-palette"></i><span>Home</span></a></div>
             <div class="nav-button"><a class="w-100" href="{{route('productsManagerIndex')}}"><i class="fas fa-images"></i><span>Product</span></a></div>
-            <div class="nav-button"><a class="w-100" href="{{route('adminCategoriesMagager')}}"><i class="fas fa-thumbtack"></i><span>Category</span></a></div>
+            <div class="nav-button"><a class="w-100" href=""><i class="fas fa-thumbtack"></i><span>Category</span></a></div>
             <hr />
-            <div class="nav-button"><a class="w-100" href="{{route('adminVouchersMagager')}}"><i class="fas fa-ticket"></i><span>Voucher</span></a></div>
-            <div class="nav-button"><a class="w-100" href="{{route('adminOrdersMagager')}}"><i class="fas fa-images"></i><span>Order</span></a></div>
-            <div class="nav-button"><a class="w-100" href="{{route('adminBannersMagager')}}"><i class="fas fa-fire"></i><span>Banner</span></a></div>
+            <div class="nav-button"><a class="w-100" href="{{route('vouchersManagerIndex')}}"><i class="fas fa-ticket"></i><span>Voucher</span></a></div>
+            <div class="nav-button"><a class="w-100" href="{{route('ordersManagerIndex')}}"><i class="fas fa-images"></i><span>Order</span></a></div>
+            <div class="nav-button"><a class="w-100" href="{{route('bannersManagerIndex')}}"><i class="fas fa-fire"></i><span>Banner</span></a></div>
             <div class="nav-button"><a class="w-100" href="#"><i class="fas fa-magic"></i><span>Spark</span></a></div>
             <hr />
-            <div class="nav-button"><i class="fas fa-gem"></i><span>Codepen Pro</span></div>
+            <div class="nav-button"><i class="fas fa-gem"></i><span>e-SportsJacket</span></div>
             <div id="nav-content-highlight"></div>
         </div>
         <input id="nav-footer-toggle" type="checkbox" />
         <div id="nav-footer">
             <div id="nav-footer-heading">
                 <div id="nav-footer-avatar"><img src="https://gravatar.com/avatar/4474ca42d303761c2901fa819c4f2547" /></div>
-                <div id="nav-footer-titlebox"><a id="nav-footer-title" href="#" class="w-auto">PhạmChình</a><span id="nav-footer-subtitle">Admin</span></div>
+                <div id="nav-footer-titlebox"><a id="nav-footer-title" href="#" class="w-auto text-nowrap">{{Auth::user()->informations->first()->full_name}}</a><span id="nav-footer-subtitle">{{Auth::user()->role}}</span></div>
                 <label for="nav-footer-toggle"><i class="fas fa-caret-up"></i></label>
             </div>
             <div id="nav-footer-content">
@@ -60,7 +60,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.js.map"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{mix('resources/js/admin/product.js')}}"></script>
+    <script src="{{mix('resources/js/admin/banner.js')}}"></script>
     <script>
         $(document).ready(function(e) {
             //-----------------------------------------------------------Notification function-----------------------------------------------------------
@@ -124,14 +126,36 @@
                     roll_in = false;
                 }
             });
+            //-----------------------------------------------------Thông báo-----------------------------------------------------
             @if(session('statusSuccess'))
             var message = @json(session('statusSuccess'));
             notifications('success', message, 'Successfully');
-            @endif
-            @if(session('statusError'))
+            @elseif(session('statusError'))
             var message = @json(session('statusError'));
             notifications('error', message, 'Error');
+            @elseif(session('statusWarning'))
+            var message = @json(session('statusWarning'));
+            notifications('warning', message, 'Warning');
             @endif
+            //-----------------------------------------------------Thông báo xác nhận-----------------------------------------------------
+            function confirmDisable(productId) {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You want to disable this product!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, disable it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('disableForm-' + productId).submit();
+                    }
+                });
+            }
+            $('.onclickDisable').click(function() {
+                confirmDisable($(this).data('id'));
+            });
         })
     </script>
 </body>

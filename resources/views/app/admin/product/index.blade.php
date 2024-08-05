@@ -26,25 +26,29 @@
                 @foreach ($listOfProducts as $itemProduct)
                 <tr>
                     <td class="text-center">{{++$i}}</td>
-                    <td class="text-center">{{$itemProduct->name}}</td>
+                    <td class="text-center">{{Str::limit($itemProduct->name,50)}}</td>
                     <td>
                         <div>
+                            @if (file_exists(public_path('uploads/').$itemProduct->image))
+                            <img src="{{asset('uploads/'.$itemProduct->image)}}" alt="" width="100px">
+                            @else
                             <img src="{{$itemProduct->image}}" alt="" width="100px">
+                            @endif
                         </div>
                     </td>
                     <td class="text-center currency">{{$itemProduct->purchase_price}}</td>
                     <td class="text-center currency">{{$itemProduct->sale_price}}</td>
                     <td class="text-center">{{$itemProduct->category_name}}</td>
                     <td class="text-center">{{$itemProduct->total_variants}}</td>
-                    <td class="text-center">{{$itemProduct->description}}</td>
-                    <td>
-                        <div class="d-flex justity-content-between align-items-center">
+                    <td class="text-center">{{Str::limit($itemProduct->description,50)}}</td>
+                    <td class="control-cell">
+                        <div class="d-flex justify-content-center align-items-center">
                             <span class="btn btn-dark border border-white"><i class="fas fa-eye"></i></span>
-                            <span class="btn btn-warning border border-white ms-2"><i class="fas fa-pen-to-square text-white"></i></span>
-                            <form action="{{route('deleteProduct',$itemProduct->id)}}" method="POST">
+                            <a href="{{route('editProduct',$itemProduct->id)}}" class="btn btn-warning border border-white ms-2"><i class="fas fa-pen-to-square text-white"></i></a>
+                            <form id="disableForm-{{ $itemProduct->id }}" action="{{route('deleteProduct',$itemProduct->id)}}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger border border-white ms-2"><i class="fas fa-ban"></i></button>
+                                <span class="btn btn-danger border border-white ms-2 onclickDisable" data-id="{{ $itemProduct->id }}"><i class="fas fa-ban"></i></spa>
                             </form>
                         </div>
                     </td>

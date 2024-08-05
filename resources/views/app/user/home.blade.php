@@ -6,28 +6,20 @@
     <!-- banner -->
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
         <div id="categories" class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="2" aria-label="Slide 3"></button>
-            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="3" aria-label="Slide 4"></button>
-            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            @if($banner_images!=null)
+            @foreach ($banner_images as $key=> $itemImage)
+            <button type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide-to="{{$key}}" class="{{$key==0?'active':''}}" aria-current="{{$key==0?'true':''}}" aria-label="Slide {{$key+1}}"></button>
+            @endforeach
+            @endif
         </div>
         <div class="carousel-inner">
+            @if($banner_images!=null)
+            @foreach ($banner_images as $itemImage)
             <a href="#" class="carousel-item active">
-                <img src="{{asset('image/banner/banner1.jpg')}}" class="d-block w-100" alt="...">
+                <img src="{{asset('uploads/'.$itemImage->file_name)}}" class="d-block w-100" alt="...">
             </a>
-            <a href="#" class="carousel-item">
-                <img src="{{asset('image/banner/banner2.jpg')}}" class="d-block w-100" alt="...">
-            </a>
-            <a href="#" class="carousel-item">
-                <img src="{{asset('image/banner/banner3.jpg')}}" class="d-block w-100" alt="...">
-            </a>
-            <a href="#" class="carousel-item">
-                <img src="{{asset('image/banner/banner4.jpg')}}" class="d-block w-100" alt="...">
-            </a>
-            <a href="#" class="carousel-item">
-                <img src="{{asset('image/banner/banner5.jpg')}}" class="d-block w-100" alt="...">
-            </a>
+            @endforeach
+            @endif
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -50,21 +42,13 @@
                     <a href="">
                         <img class="w-100 fix-height" src="{{$category->image}}" alt="">
                     </a>
-                    <a class="btn btn-white btn-outline-dark w-100 rounded-bottom pt-3 pb-3 mt-3 fs-5 fw-bold" >{{$category->name}}</a>
+                    <a class="btn btn-white btn-outline-dark w-100 rounded-bottom pt-3 pb-3 mt-3 fs-5 fw-bold">{{$category->name}}</a>
                 </div>
 
                 @endforeach
             </div>
             <div class="d-flex justify-content-center mt-3">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item"><a class="page-link text-dark" href="#">Previous</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">Next</a></li>
-                    </ul>
-                </nav>
+                {{$categories->appends(['categories_page'=>request()->input('categories_page')])->links()}}
             </div>
         </div>
         <!-- content1 -->
@@ -77,8 +61,8 @@
                 <div class="col-2 position-relative mb-4">
                     <span class="badge bg-danger position-absolute end-0 me-2">Hot</span>
                     <a href="{{route('userProductDetail.show',$product->id)}}" class="text-decoration-none">
-                        <img class="w-100" src="{{$product->image}}" alt="">
-                        <p class="text-dark text-center border-bottom pb-3 fw-bold mt-3">{{$product->name}}...</p>
+                        <img class="w-100" src="{{asset('uploads/'.$product->image)}}" alt="">
+                        <p class="text-dark text-center border-bottom pb-3 fw-bold mt-3">{{Str::limit($product->name,20)}}</p>
                     </a>
                     <div class="d-flex flex-column justify-content-center align-items-center">
                         <div class="text-decoration-line-through mb-1 d-flex flex-row">
@@ -95,15 +79,7 @@
                 @endforeach
             </div>
             <div class="d-flex justify-content-center">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item"><a class="page-link text-dark" href="#">Previous</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link text-dark" href="#">Next</a></li>
-                    </ul>
-                </nav>
+                {{$products->appends(['products_page'=>request()->input('products_page')])->links()}}
             </div>
         </div>
     </div>
