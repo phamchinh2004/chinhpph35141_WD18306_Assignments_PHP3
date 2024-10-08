@@ -44,7 +44,7 @@
                             <tr class="">
                                 <td class="">
                                     <div class="form-check d-flex flex-row align-items-center">
-                                        <img class="me-3" src="{{$item['image']}}" alt="" width="110">
+                                        <img class="me-3" src="{{asset('uploads/'.$item['image'])}}" alt="" width="110">
                                         <h6 class="form-check-label">
                                             {{$item['name']}}
                                         </h6>
@@ -69,7 +69,7 @@
                                 </td>
                                 <td class="centered text-center">{{$item['quantity']}}</td>
 
-                                <td class="centered text-center text-danger currency">{{$item['total_price']}}</td>
+                                <td class="centered text-center text-danger currency fw-bold">{{$item['total_price']}}</td>
                             </tr>
 
                             @endforeach
@@ -166,7 +166,7 @@
             @foreach ($listVoucher as $itemVoucher)
             <div class="d-flex flex-row align-items-center justify-content-between border border-white p-2 rounded mb-3 item_voucher bg-dark">
                 <div class="w-25 me-2">
-                    <img src="{{$itemVoucher->image}}" alt="" class="w-100">
+                    <img src="{{asset('uploads/'.$itemVoucher->image)}}" alt="" class="w-100">
                 </div>
                 <div class="w-50">
                     <div class="lh-lg">
@@ -177,7 +177,7 @@
                         <div class="d-flex flex-column align-items-start lh-lg">
                             <span class="badge mb-1 p-0">HSD: {{$itemVoucher->end_date}}</span>
                             <span class="badge mb-0 p-0 text-danger">Hết hạn sau {{$itemVoucher->days_remaining}} ngày</span>
-                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}}</span>
+                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}} suất</span>
                         </div>
                     </div>
                 </div>
@@ -196,7 +196,7 @@
             @foreach ($listFreeshipVoucher as $itemVoucher)
             <div class="d-flex flex-row align-items-center border border-white p-2 rounded mb-3 freeship_item_voucher">
                 <div class="w-25 me-2 d-flex flex-row align-items-center">
-                    <img src="{{$itemVoucher->image}}" alt="" class="w-100">
+                    <img src="{{asset('uploads/'.$itemVoucher->image)}}" alt="" class="w-100">
                 </div>
                 <div class="w-50">
                     <div class="lh-lg">
@@ -207,7 +207,7 @@
                         <div class="d-flex flex-column align-items-start lh-lg">
                             <span class="badge mb-1 p-0">HSD: {{$itemVoucher->end_date}}</span>
                             <span class="badge mb-0 p-0 text-danger">Hết hạn sau {{$itemVoucher->days_remaining}} ngày</span>
-                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}}</span>
+                            <span class="badge mb-0 p-0 text-success">Còn: {{$itemVoucher->quantity}} suất</span>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,8 @@
 <div class="border bg-dark rounded p-2">
     <h3 class="text-white">Product Management</h3>
     <div class="d-flex justify-content-end">
-        <a href="{{route('createProduct')}}" class="btn btn-success"><i class="fas fa-plus me-2"></i>Create</a>
+        <a href="{{route('createProduct')}}" class="btn btn-success"><i class="fas fa-plus me-2"></i>Create product</a>
+        <a href="" class="btn btn-success"><i class="fas fa-plus me-2"></i>Create product variant</a>
     </div>
     <div class="table-container scroll-x">
         <table class="table table-hover table-dark mt-4 border ">

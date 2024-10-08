@@ -41,7 +41,7 @@
                                     <td class="">
                                         <div class="form-check d-flex flex-row align-items-center">
                                             <input class="form-check-input me-3 product-checkbox checkBoxProduct" type="checkbox">
-                                            <img class="me-3" src="{{$item_cart['image']}}" alt="" width="110">
+                                            <img class="me-3" src="{{asset('uploads/'.$item_cart['image'])}}" alt="" width="110">
                                             <h6 class="form-check-label">
                                                 {{$item_cart['product_name']}}
                                             </h6>

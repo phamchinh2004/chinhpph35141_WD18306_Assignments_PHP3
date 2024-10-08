@@ -94,7 +94,7 @@ class ProductController extends Controller
         $product = Product::find($id);
         if ($product) {
             $categories = Category::all();
-            return view('app.admin.products.edit', compact('product', 'categories'));
+            return view('app.admin.product.edit', compact('product', 'categories'));
         } else {
             return back()->with('error', 'Không tìm thấy thông tin sản phẩm cần sửa!');
         }

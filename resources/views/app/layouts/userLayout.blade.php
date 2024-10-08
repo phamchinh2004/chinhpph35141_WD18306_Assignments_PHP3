@@ -966,14 +966,14 @@
                         notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
                     }
                 } else {
-                    if ($('.cancel_use_voucher').data('id') == voucher_id_focused) {
-                        $('.cancel_use_voucher').addClass('use_voucher');
-                        $('.cancel_use_voucher').removeClass('btn btn-danger text-white bg-danger');
-                        $('.cancel_use_voucher').addClass('btn btn-dark text-dark bg-white');
-                        $('.cancel_use_voucher').text('Áp dụng');
-                        $('.cancel_use_voucher').removeClass('cancel_use_voucher');
-                    }
                     if (value_total_payment > voucher_minimum_order_value) {
+                        if ($('.cancel_use_voucher').data('id') == voucher_id_focused) {
+                            $('.cancel_use_voucher').addClass('use_voucher');
+                            $('.cancel_use_voucher').removeClass('btn btn-danger text-white bg-danger');
+                            $('.cancel_use_voucher').addClass('btn btn-dark text-dark bg-white');
+                            $('.cancel_use_voucher').text('Áp dụng');
+                            $('.cancel_use_voucher').removeClass('cancel_use_voucher');
+                        }
                         if (voucher_type == 'percent') {
                             amount_reduce_voucher = value_total_payment * voucher_amount / 100;
                             $('.reduce_voucher_costs').text('-' + voucher_amount + '%');
@@ -1095,14 +1095,14 @@
                         notifications('warning', 'Số tiền thanh toán tối thiểu là: ' + voucher_minimum_order_value + ' mới có thể dùng voucher này!', 'Cảnh báo!')
                     }
                 } else {
-                    if ($('.cancel_use_freeship_voucher').data('id') == freeship_voucher_id_focused) {
-                        $('.cancel_use_freeship_voucher').addClass('use_freeship_voucher');
-                        $('.cancel_use_freeship_voucher').removeClass('btn btn-danger text-white bg-danger');
-                        $('.cancel_use_freeship_voucher').addClass('btn btn-dark text-dark bg-white');
-                        $('.cancel_use_freeship_voucher').text('Áp dụng');
-                        $('.cancel_use_freeship_voucher').removeClass('cancel_use_freeship_voucher');
-                    }
                     if (value_total_payment > voucher_minimum_order_value) {
+                        if ($('.cancel_use_freeship_voucher').data('id') == freeship_voucher_id_focused) {
+                            $('.cancel_use_freeship_voucher').addClass('use_freeship_voucher');
+                            $('.cancel_use_freeship_voucher').removeClass('btn btn-danger text-white bg-danger');
+                            $('.cancel_use_freeship_voucher').addClass('btn btn-dark text-dark bg-white');
+                            $('.cancel_use_freeship_voucher').text('Áp dụng');
+                            $('.cancel_use_freeship_voucher').removeClass('cancel_use_freeship_voucher');
+                        }
 
                         $('.total_payment').text(value_total_payment - amount_reduce_voucher - voucher_amount);
 
